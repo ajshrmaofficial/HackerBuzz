@@ -42,7 +42,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme]);
 
   const toggleTheme = (selectedTheme?: Theme) => {
-    console.log('selectedTheme', selectedTheme);
     if (selectedTheme) {
       setTheme(selectedTheme);
     } else {
