@@ -51,44 +51,6 @@ export class CommentLoader {
     this.loadedComments = new Map();
   }
 
-  // async loadAllCommentsBFS(parentId: number): Promise<HN_ITEM_TYPE[]> {
-  //   const queue: number[] = [parentId];
-  //   const allComments: HN_ITEM_TYPE[] = [];
-  //   const seenIds = new Set<number>();
-    
-  //   while (queue.length > 0) {
-  //     const batchSize = 10;
-  //     const currentBatch = queue.splice(0, batchSize);
-      
-  //     const commentPromises = currentBatch.map(id => {
-  //       if (this.loadedComments.has(id)) {
-  //         return Promise.resolve(this.loadedComments.get(id)!);
-  //       }
-  //       return fetch('item', id);
-  //     });
-
-  //     const comments = await Promise.all(commentPromises);
-
-  //     for (const comment of comments) {
-  //       if (!comment || comment.deleted || comment.dead) continue;
-        
-  //       if (!seenIds.has(comment.id)) {
-  //         seenIds.add(comment.id);
-  //         this.loadedComments.set(comment.id, comment);
-  //         allComments.push(comment);
-
-  //         if (comment.kids?.length) {
-  //           queue.push(...comment.kids.filter(kid => !seenIds.has(kid)));
-  //         }
-  //       }
-  //     }
-
-  //     await new Promise(resolve => setTimeout(resolve, 100));
-  //   }
-
-  //   return allComments;
-  // }
-
   async loadAllCommentsBFS(parentId: number): Promise<HN_ITEM_TYPE[]> {
     const queue: number[] = [parentId];
     const allComments: HN_ITEM_TYPE[] = [];
