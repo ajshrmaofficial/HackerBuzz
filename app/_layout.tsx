@@ -6,6 +6,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeProvider, useTheme } from "@/theme/context";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
+import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 const queryClient = new QueryClient();
 
@@ -21,10 +22,32 @@ export default function RootLayout() {
   const SettingsIcon = () => {
     const router = useRouter();
     const { colors } = useTheme();
+    const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+    const rotation = useSharedValue(0);
+
+    const animatedStyle = useAnimatedStyle(()=>{
+      return {
+        transform: [
+          {rotate: `${interpolate(rotation.value, [0, 1], [0, 360])}deg`}
+        ]
+      }
+    })
+
+    const onPress = () => {
+      rotation.value = withSpring(rotation.value +1, {
+        damping: 15,
+        stiffness: 90,
+        mass: 0.8
+      });
+      // setTimeout(()=>{
+      //   router.push({pathname: '/settings'});
+      // }, 400);
+        router.push({pathname: '/settings'});
+    }
     return(
-      <TouchableOpacity onPress={() => router.push({pathname: '/settings'})} style={{padding: 10}}>
+      <AnimatedTouchable onPress={onPress} style={[{padding: 10}, animatedStyle]}>
         <AntDesign name="setting" size={24} color={colors.text} />
-      </TouchableOpacity>
+      </AnimatedTouchable>
     )
   }
 
@@ -49,11 +72,13 @@ export default function RootLayout() {
           },
           headerTintColor: colors.text,
           headerRight: () => <SettingsIcon/>,
+          animation: 'fade',
+          animationDuration: 200
         }}
       >
         <Stack.Screen name="index" options={{title: "HackerBuzz"}} />
-        <Stack.Screen name="comments" options={{title: "Comments", headerShown: false}} />
-        <Stack.Screen name="settings" options={{title: "Settings", headerRight: ()=>null}} />
+        <Stack.Screen name="comments" options={{title: "Comments", headerShown: false, presentation: 'containedTransparentModal'}} />
+        <Stack.Screen name="settings" options={{title: "Settings", headerRight: ()=>null, presentation: 'containedTransparentModal'}} />
       </Stack>
       </>
     );
