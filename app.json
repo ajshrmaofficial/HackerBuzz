@@ -6,41 +6,39 @@
     "contact": "ajshrmaofficial@gmail.com",
     "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/images/hacker-news.svg",
+    "icon": "./assets/images/hacker-news.jpg",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.HackerBuzz"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/hacker-news.svg",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/hacker-news.jpg",
+        "backgroundColor": "#000"
       },
       "googleServicesFile": "./android/app/google-services.json",
       "package": "com.anonymous.HackerBuzz"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/hacker-news.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#000"
         }
       ],
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/GloriaHallelujah.ttf"]
+          "fonts": [
+            "./assets/fonts/GloriaHallelujah.ttf"
+          ]
         }
       ]
     ],
