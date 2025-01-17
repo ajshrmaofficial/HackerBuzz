@@ -1,10 +1,10 @@
 import { HN_ITEM_TYPE } from "@/utility/definitions";
 import { useEffect, useState, useCallback } from "react";
-import { FlatList, Text, View } from "react-native";
+import { Text } from "react-native";
 import StoryTile from "./storyTile";
 import { fetchItemsByIdsQuery } from "@/utility/HN_Firebase";
 import { useQuery } from "@tanstack/react-query";
-import Animated, { FadeInRight, FadeOut, LinearTransition } from "react-native-reanimated";
+import Animated, { FadeInUp, FadeOut, LinearTransition } from "react-native-reanimated";
 import { useTheme } from "@/theme/context";
 
 const STORY_FETCH_LIMIT = 10;
@@ -51,7 +51,7 @@ export default function StoriesList({ postIds, currentSelected }: { postIds: str
                 layout={LinearTransition.springify()}
                 itemLayoutAnimation={LinearTransition.springify()}
             />
-            {isLoading && <Animated.View entering={FadeInRight} style={{ borderWidth: 1, margin: 3, padding: 3, borderColor: colors.text, maxWidth: 'auto', borderRadius: 5 }}><Text style={{ color: colors.text }}>Loading...</Text></Animated.View>}
+            {isLoading && <Animated.View entering={FadeInUp} style={{ borderWidth: 1, margin: 3, padding: 3, borderColor: colors.text, width: '100%', borderRadius: 5, position: 'absolute', bottom: 0, zIndex: 1 }}><Text style={{ color: colors.text }}>Loading...</Text></Animated.View>}
         </Animated.View>
     );
 }
