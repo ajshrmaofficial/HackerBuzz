@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "456832834182",
+    "project_id": "hackerbuzz-01",
+    "storage_bucket": "hackerbuzz-01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456832834182:android:eb2e6727996b7df208cf07",
+        "android_client_info": {
+          "package_name": "com.anonymous.HackerBuzz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCreQlv5sDHAEBk_vr6DijZfCtrA6x2fsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

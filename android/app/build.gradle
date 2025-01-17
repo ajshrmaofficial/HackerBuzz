@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: "com.google.gms.google-services"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -100,6 +101,12 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+        release {
+            storeFile file('hackerbuzz.keystore')
+            storePassword 'HackMac@2683'
+            keyAlias 'hackerbuzz_key_alias'
+            keyPassword 'HackMac@2683'
         }
     }
     buildTypes {
