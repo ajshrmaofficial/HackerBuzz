@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import HTMLView from 'react-native-htmlview';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetBroswer } from "@/components/bottomSheetBrowser";
@@ -8,6 +8,56 @@ import { CommentLoader } from "@/utility/HN_Firebase";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { formatDistanceToNow, fromUnixTime } from 'date-fns';
 import { useTheme } from "@/theme/context";
+import Loader from "@/components/loader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 10,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  commentContainer: {
+    padding: 12,
+    marginVertical: 4,
+    borderRadius: 8,
+    borderLeftWidth: 1,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  username: {
+    fontWeight: 'bold',
+  },
+  timestamp: {
+    fontSize: 12,
+  },
+  repliesCount: {
+    marginTop: 8,
+    fontSize: 12,
+  },
+  moreReplies: {
+    fontSize: 14,
+  },
+  errorContainer: {
+    padding: 16,
+    margin: 16,
+    borderRadius: 8,
+  },
+  errorText: {
+    fontSize: 16,
+  }
+});
 
 interface CommentTreeNode {
     id: number;
@@ -162,11 +212,7 @@ const Comment: React.FC<CommentProps> = ({
     };
   
     if (loading) {
-      return (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.text} />
-        </View>
-      );
+      return <Loader />
     }
   
     if (error) {
@@ -205,65 +251,19 @@ const Comment: React.FC<CommentProps> = ({
     );
   };
   
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      padding: 10,
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    commentContainer: {
-      padding: 12,
-      marginVertical: 4,
-      borderRadius: 8,
-      borderLeftWidth: 1,
-    },
-    commentHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 8,
-    },
-    username: {
-      fontWeight: 'bold',
-    },
-    timestamp: {
-      fontSize: 12,
-    },
-    repliesCount: {
-      marginTop: 8,
-      fontSize: 12,
-    },
-    moreReplies: {
-      fontSize: 14,
-    },
-    errorContainer: {
-      padding: 16,
-      margin: 16,
-      borderRadius: 8,
-    },
-    errorText: {
-      fontSize: 16,
-    }
-  });
   
 export default function Comments() {
     const commentIds = (useLocalSearchParams().commentIds as string).split(',');
     const storyURL = useLocalSearchParams().storyURL as string;
     const title = useLocalSearchParams().title as string;
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const insets = useSafeAreaInsets();
 
     const router = useRouter();
     const { colors } = useTheme();
   
     return (
-        <GestureHandlerRootView style={{flex: 1}}>
+        <GestureHandlerRootView style={{flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
             <View style={[styles.container, { backgroundColor: colors.primary }]}>
                 <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
