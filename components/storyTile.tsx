@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import { Router, useRouter } from "expo-router";
-import Animated, { FadeInRight, LinearTransition } from "react-native-reanimated";
+import Animated, { FadeInUp, LinearTransition } from "react-native-reanimated";
 import { useTheme } from "@/theme/context";
 
 const styles = StyleSheet.create({
@@ -51,7 +51,7 @@ export default function StoryTile({ story }: { story: HN_ITEM_TYPE }) {
   const router = useRouter();
   return (
     <AnimatedTouchable
-      entering={FadeInRight}
+      entering={FadeInUp}
       layout={LinearTransition.springify()}
       onPress={() => openStory(story.kids || [], story.url || '', story.title || '', router)}
       onLongPress={() => openInBrowser(story?.url)}
