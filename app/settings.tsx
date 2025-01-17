@@ -1,28 +1,25 @@
 import React from 'react';
 import { useTheme } from "@/theme/context";
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import app from '../app.json';
+import Animated, { FadeInRight, LinearTransition } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const sections = ['Theme', 'About'];
 
+const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
+const AnimatedView = Animated.createAnimatedComponent(View);
+
 export default function Settings() {
     const { theme, toggleTheme, colors } = useTheme();
+    const insets = useSafeAreaInsets();
 
     const styles = StyleSheet.create({
         container: {
             flex: 1,
             backgroundColor: colors.primary,
-        },
-        header: {
-            padding: 20,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-        },
-        headerText: {
-            fontSize: 24,
-            fontWeight: 'bold',
-            color: colors.text,
+            paddingBottom: insets.bottom,
         },
         section: {
             padding: 20,
@@ -56,82 +53,106 @@ export default function Settings() {
             backgroundColor: colors.primary,
         },
         aboutContainer: {
-            marginTop: 10,
+            marginTop: 15,
+            marginHorizontal: -5, // compensate for item padding
+            // marginBottom: 40
         },
         aboutItem: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginVertical: 8,
+            backgroundColor: colors.buttonBg,
+            padding: 16,
+            marginHorizontal: 5,
+            marginBottom: 10,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        iconContainer: {
+            backgroundColor: colors.primary,
+            padding: 10,
+            borderRadius: 12,
+            marginRight: 12,
         },
         aboutText: {
             color: colors.text,
             fontSize: 16,
-            marginLeft: 12,
+            fontWeight: '500',
         },
         aboutLabel: {
             color: colors.textSecondary,
             fontSize: 14,
-            marginLeft: 12,
+            marginTop: 4,
+        },
+        footer: {
+            padding: 20,
+            alignItems: 'center',
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+            backgroundColor: colors.primary,
+            height: 100
+        },
+        footerText: {
+            color: colors.textSecondary,
+            fontSize: 14,
+            fontWeight: '500',
         }
     });
 
     return (
-        <SafeAreaView style={styles.container}>
-            {sections.map((section, index) => (
-                <View key={index} style={styles.section}>
-                    <Text style={styles.sectionText}>{section}</Text>
-                    {section === 'Theme' && (
-                        <View>
-                            {['light', 'dark', 'system'].map((option) => (
-                                <TouchableOpacity
-                                    key={option}
-                                    style={[styles.themeOption, theme === option ? styles.activeThemeOption : {}]}
-                                    onPress={() => toggleTheme(option as 'light' | 'dark' | 'system')}
-                                >
-                                    <Text style={styles.themeOptionText}>
-                                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                                    </Text>
-                                    {theme === option && (
-                                        <Ionicons name="checkmark-circle" size={24} color={colors.link} />
-                                    )}
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    )}
-                    {section === 'About' && (
-                        <View style={styles.aboutContainer}>
-                            <View style={styles.aboutItem}>
-                                <Ionicons name="apps" size={24} color={colors.text} />
-                                <View>
-                                    <Text style={styles.aboutText}>{app.expo.name}</Text>
-                                    <Text style={styles.aboutLabel}>App Name</Text>
-                                </View>
+        <AnimatedSafeAreaView style={styles.container} entering={FadeInRight.duration(200).springify()}>
+            <ScrollView>
+                {sections.map((section, index) => (
+                    <AnimatedView key={index} style={styles.section} entering={FadeInRight.delay(index*50).duration(200).springify()} layout={LinearTransition.springify()}>
+                        <Text style={styles.sectionText}>{section}</Text>
+                        {section === 'Theme' && (
+                            <View>
+                                {['light', 'dark', 'system'].map((option) => (
+                                    <TouchableOpacity
+                                        key={option}
+                                        style={[styles.themeOption, theme === option ? styles.activeThemeOption : {}]}
+                                        onPress={() => toggleTheme(option as 'light' | 'dark' | 'system')}
+                                    >
+                                        <Text style={styles.themeOptionText}>
+                                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                                        </Text>
+                                        {theme === option && (
+                                            <Ionicons name="checkmark-circle" size={24} color={colors.link} />
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
                             </View>
-                            <View style={styles.aboutItem}>
-                                <Ionicons name="person" size={24} color={colors.text} />
-                                <View>
-                                    <Text style={styles.aboutText}>{app.expo.owner}</Text>
-                                    <Text style={styles.aboutLabel}>Developer</Text>
-                                </View>
+                        )}
+                        {section === 'About' && (
+                            <View style={styles.aboutContainer}>
+                                {[
+                                    { icon: 'apps', label: 'App Name', value: app.expo.name },
+                                    { icon: 'person', label: 'Developer', value: app.expo.owner },
+                                    { icon: 'information-circle', label: 'Version', value: app.expo.version },
+                                    { icon: 'mail', label: 'Contact', value: app.expo.contact }
+                                ].map((item, index) => (
+                                    <Animated.View
+                                        key={item.label}
+                                        entering={FadeInRight.delay(index * 100).duration(300).springify()}
+                                        style={styles.aboutItem}
+                                    >
+                                        <View style={styles.iconContainer}>
+                                            <Ionicons name={item.icon as any} size={28} color={colors.text} />
+                                        </View>
+                                        <View>
+                                            <Text style={styles.aboutText}>{item.value}</Text>
+                                            <Text style={styles.aboutLabel}>{item.label}</Text>
+                                        </View>
+                                    </Animated.View>
+                                ))}
                             </View>
-                            <View style={styles.aboutItem}>
-                                <Ionicons name="information-circle" size={24} color={colors.text} />
-                                <View>
-                                    <Text style={styles.aboutText}>{app.expo.version}</Text>
-                                    <Text style={styles.aboutLabel}>Version</Text>
-                                </View>
-                            </View>
-                            <View style={styles.aboutItem}>
-                                <Ionicons name="mail" size={24} color={colors.text} />
-                                <View>
-                                    <Text style={styles.aboutText}>{app.expo.contact}</Text>
-                                    <Text style={styles.aboutLabel}>Contact</Text>
-                                </View>
-                            </View>
-                        </View>
-                    )}
-                </View>
-            ))}
-        </SafeAreaView>
+                        )}
+                    </AnimatedView>
+                ))}
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>Made with ❤️</Text>
+            </View>
+            </ScrollView>
+        </AnimatedSafeAreaView>
     );
 }
