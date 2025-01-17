@@ -1,15 +1,14 @@
 import StoriesList from "@/components/storiesList";
 import Loader from "@/components/loader";
-import ThemedView from "@/components/themedView";
 import { fetch } from "@/utility/HN_Firebase";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { HN_API_ITEM_TYPE } from "@/utility/definitions";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "@/theme/context";
+import React from "react";
 
 const storyTypeArr = ["beststories", "newstories", "topstories",  "askstories", "showstories", "jobstories"];
-
 
 function StoryTypeSelector({ types, onSelect, currentSelected }: { types: string[], onSelect: (type: HN_API_ITEM_TYPE) => void, currentSelected?: HN_API_ITEM_TYPE }) {
   const { colors } = useTheme();
@@ -63,15 +62,11 @@ export default function Home() {
     refetchOnWindowFocus: true,
   });
 
-  if (storyIdsQuery.isLoading) {
-    return <Loader />;
-  }
-
   return (
-    <ThemedView>
+    <>
       <StoryTypeSelector types={storyTypeArr} currentSelected={selectedStoryType} onSelect={setSelectedStoryType} />
-      <StoriesList currentSelected={selectedStoryType} postIds={storyIdsQuery.data || []} />
-    </ThemedView>
+      {storyIdsQuery.isLoading ? <Loader/> : <StoriesList currentSelected={selectedStoryType} postIds={storyIdsQuery.data || []} />}
+    </>
   );
 }
 
