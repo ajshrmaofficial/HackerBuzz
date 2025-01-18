@@ -92,7 +92,6 @@ const Comment: React.FC<CommentProps> = ({
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(depth > 3);
     const { colors } = useTheme();
-    console.log(comment.text);
   
     const handlePress = () => {
       if (onPress) {
