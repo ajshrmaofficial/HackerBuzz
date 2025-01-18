@@ -92,6 +92,7 @@ const Comment: React.FC<CommentProps> = ({
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(depth > 3);
     const { colors } = useTheme();
+    console.log(comment.text);
   
     const handlePress = () => {
       if (onPress) {
@@ -105,12 +106,27 @@ const Comment: React.FC<CommentProps> = ({
       return formatDistanceToNow(fromUnixTime(timestamp), { addSuffix: true });
     };
   
-    const htmlViewStyles = {
+    const htmlViewStyles = StyleSheet.create({
       p: { marginVertical: 0, fontSize: 14, lineHeight: 20, color: colors.text },
-      a: { color: colors.link },
-      pre: { backgroundColor: colors.secondary, padding: 8, borderRadius: 4 },
-      code: { fontFamily: 'monospace', backgroundColor: colors.secondary },
-    };
+      a: { color: colors.link, textDecorationLine: 'underline' as 'underline' },
+      pre: { backgroundColor: colors.secondary, padding: 8, borderRadius: 4, color: colors.text },
+      code: { fontFamily: 'monospace', backgroundColor: colors.secondary, color: colors.text },
+      blockquote: { borderLeftWidth: 4, borderLeftColor: colors.border, paddingLeft: 8, color: colors.textSecondary },
+      ul: { marginVertical: 8, paddingLeft: 20, color: colors.text },
+      ol: { marginVertical: 8, paddingLeft: 20, color: colors.text },
+      li: { marginVertical: 4, color: colors.text },
+      h1: { fontSize: 20, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+      h2: { fontSize: 18, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+      h3: { fontSize: 16, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+      h4: { fontSize: 14, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+      h5: { fontSize: 12, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+      h6: { fontSize: 10, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+      strong: { fontWeight: 'bold', color: colors.text },
+      em: { fontStyle: 'italic', color: colors.text },
+      i: { fontStyle: 'italic', color: colors.text },
+      b: { fontWeight: 'bold', color: colors.text },
+      div: { color: colors.text }
+    });
   
     if (comment.deleted || comment.dead) {
       return null;
@@ -145,7 +161,7 @@ const Comment: React.FC<CommentProps> = ({
           
           {!isCollapsed && comment.text && (
             <HTMLView
-              value={comment.text}
+              value={`<div>${comment.text}</div>`}
               stylesheet={htmlViewStyles}
               addLineBreaks={false}
             />
