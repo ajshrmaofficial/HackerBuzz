@@ -10,14 +10,11 @@ const SNAP_POINTS = ['3%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%
 export const BottomSheetBroswer = forwardRef(({url}: {url?: string}, ref: React.Ref<BottomSheet>) => {
     const [loadProgress, setLoadProgress] = useState<number>(0);
     const [loadingState, setLoadingState] = useState<"not-started" | "loading" | "loaded">("not-started");
-    const [bottomSheetCompleteOpen, setBottomSheetCompleteOpen] = useState(false);
     const { colors } = useTheme();
 
     const handleSheetChanges = useCallback(async(index: number) => {
         if(index>0 && url && loadProgress !== 1)
             setLoadingState("loading");
-        if(index === SNAP_POINTS.length-1) setBottomSheetCompleteOpen(true);
-        else setBottomSheetCompleteOpen(false);
       }, []);
 
     const handleLoadProgress = useCallback((progressEvent: WebViewProgressEvent) => {
@@ -34,8 +31,9 @@ export const BottomSheetBroswer = forwardRef(({url}: {url?: string}, ref: React.
 
     return(
         <BottomSheet
-            backgroundStyle={[styles.bottomSheet, {backgroundColor: bottomSheetCompleteOpen ? colors.primary : colors.secondary}]}
+            backgroundStyle={[styles.bottomSheet, {backgroundColor: colors.text}]}
             style={styles.bottomSheet}
+            handleIndicatorStyle={{backgroundColor: colors.primary}}
             ref={ref}
             onChange={handleSheetChanges}
             index={0}
@@ -72,7 +70,7 @@ const styles = StyleSheet.create({
       height: '100%',
     },
     progressLoader: {
-        backgroundColor: 'gray',
+        backgroundColor: 'blue',
         borderRadius: 3,
         height: 3,
         transitionProperty: 'width',
