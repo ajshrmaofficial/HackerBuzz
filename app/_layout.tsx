@@ -39,11 +39,11 @@ export default function RootLayout() {
         stiffness: 90,
         mass: 0.8
       });
-      // setTimeout(()=>{
-      //   router.push({pathname: '/settings'});
-      // }, 400);
+      setTimeout(()=>{
         router.push({pathname: '/settings'});
+      }, 400);
     }
+    
     return(
       <AnimatedTouchable onPress={onPress} style={[{padding: 10}, animatedStyle]}>
         <AntDesign name="setting" size={24} color={colors.text} />
