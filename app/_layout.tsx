@@ -1,12 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
-import { TouchableOpacity } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeProvider, useTheme } from "@/theme/context";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { TouchableOpacity } from "react-native";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +22,10 @@ export default function RootLayout() {
   const SettingsIcon = () => {
     const router = useRouter();
     const { colors } = useTheme();
-    const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+    const AnimatedIcon = Animated.createAnimatedComponent(AntDesign);
     const rotation = useSharedValue(0);
 
-    const animatedStyle = useAnimatedStyle(()=>{
+    const animatedStyle = useAnimatedStyle(()=>{ 
       return {
         transform: [
           {rotate: `${interpolate(rotation.value, [0, 1], [0, 360])}deg`}
@@ -43,11 +43,18 @@ export default function RootLayout() {
         router.push({pathname: '/settings'});
       }, 400);
     }
-    
+
+/**
+  * Currently, the `onPress` function is not working as expected.
+  * When trying to call onPress on HeaderRight, the screen is not navigating to the settings screen.
+  * Refer - https://github.com/expo/expo/issues/29489
+  * That is why using onPressIn for now.  
+*/
+
     return(
-      <AnimatedTouchable onPress={onPress} style={[{padding: 10}, animatedStyle]}>
-        <AntDesign name="setting" size={24} color={colors.text} />
-      </AnimatedTouchable>
+      <TouchableOpacity onPressIn={onPress} style={[{padding: 10}, animatedStyle]}> 
+        <AnimatedIcon name="setting" size={24} color={colors.text} />
+      </TouchableOpacity>
     )
   }
 
