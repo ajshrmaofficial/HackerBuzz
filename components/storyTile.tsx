@@ -40,8 +40,8 @@ const openInBrowser = async (url: string | undefined) => {
   if (url) await WebBrowser.openBrowserAsync(url);
 };
 
-const openStory = async (commentIds: number[], storyURL: string, title: string, router: Router) => {
-  router.push({pathname: '/comments', params: {commentIds: commentIds, storyURL: storyURL, title: title}});
+const openStory = async (story: HN_ITEM_TYPE, router: Router) => {
+  router.push({pathname: '/comments', params: {postData: JSON.stringify(story)}});
 }
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -53,7 +53,7 @@ export default function StoryTile({ story }: { story: HN_ITEM_TYPE }) {
     <AnimatedTouchable
       entering={FadeInUp}
       layout={LinearTransition.springify()}
-      onPress={() => openStory(story.kids || [], story.url || '', story.title || '', router)}
+      onPress={() => openStory(story, router)}
       onLongPress={() => openInBrowser(story?.url)}
       style={[styles.container, { borderColor: colors.border }]}
     >
