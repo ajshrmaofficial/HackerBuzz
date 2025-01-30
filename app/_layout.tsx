@@ -5,7 +5,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeProvider, useTheme } from "@/theme/context";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { TouchableOpacity } from "react-native";
 
 const queryClient = new QueryClient();
@@ -22,26 +21,9 @@ export default function RootLayout() {
   const SettingsIcon = () => {
     const router = useRouter();
     const { colors } = useTheme();
-    const AnimatedIcon = Animated.createAnimatedComponent(AntDesign);
-    const rotation = useSharedValue(0);
-
-    const animatedStyle = useAnimatedStyle(()=>{ 
-      return {
-        transform: [
-          {rotate: `${interpolate(rotation.value, [0, 1], [0, 360])}deg`}
-        ]
-      }
-    })
 
     const onPress = () => {
-      rotation.value = withSpring(rotation.value +1, {
-        damping: 15,
-        stiffness: 90,
-        mass: 0.8
-      });
-      setTimeout(()=>{
-        router.push({pathname: '/settings'});
-      }, 400);
+      router.push({pathname: '/settings'});
     }
 
 /**
@@ -52,8 +34,8 @@ export default function RootLayout() {
 */
 
     return(
-      <TouchableOpacity onPressIn={onPress} style={[{padding: 10}, animatedStyle]}> 
-        <AnimatedIcon name="setting" size={24} color={colors.text} />
+      <TouchableOpacity onPressIn={onPress} style={{padding: 10}}> 
+        <AntDesign name="setting" size={24} color={colors.text} />
       </TouchableOpacity>
     )
   }
