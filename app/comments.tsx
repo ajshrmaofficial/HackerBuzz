@@ -1,15 +1,21 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRef, useState, memo, useCallback } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
 import HTMLView from 'react-native-htmlview';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetBroswer } from "@/components/bottomSheetBrowser";
-import { CommentLoader } from "@/utility/HN_Firebase";
+import { fetchItemsByIdsQuery } from "@/utility/HN_Firebase";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { formatDistanceToNow, fromUnixTime } from 'date-fns';
 import { useTheme } from "@/theme/context";
-import Loader from "@/components/loader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HN_ITEM_TYPE } from "@/utility/definitions";
+import { AntDesign } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import Animated, { withRepeat, withSequence, withTiming, useAnimatedStyle, useDerivedValue } from "react-native-reanimated";
+import React from "react";
+
+// const COMMENT_FETCH_LIMIT = 10;
 
 const styles = StyleSheet.create({
   container: {
@@ -26,10 +32,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   commentContainer: {
-    padding: 12,
-    marginVertical: 4,
-    borderRadius: 8,
-    borderLeftWidth: 1,
+    paddingInline: 10
   },
   commentHeader: {
     flexDirection: 'row',
@@ -56,246 +59,250 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+  },
+  commentSeparator: {
+    height: 8
   }
 });
 
-interface CommentTreeNode {
-    id: number;
-    by: string;
-    text?: string;
-    time: number;
-    type: "comment";
-    children: CommentTreeNode[];
-    dead?: boolean;
-    deleted?: boolean;
-  }
+const CommentSkeleton = memo(() => {
+  const { colors } = useTheme();
+  const animatedOpacity = useDerivedValue(() => {
+    return withRepeat(
+      withSequence(
+        withTiming(0.3, {duration: 800}),
+        withTiming(0.7, {duration: 800})
+      ),
+      -1
+    );
+  });
 
-interface CommentProps {
-    comment: CommentTreeNode;
-    depth?: number;
-    maxDepth?: number;
-    onPress?: (comment: CommentTreeNode) => void;
-  }
-  
-  interface CommentsViewerProps {
-    parentId: number;
-    onError?: (error: Error) => void;
-    initialMaxDepth?: number;
-    onCommentPress?: (comment: CommentTreeNode) => void;
-  }
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: animatedOpacity.value
+  }));
 
-const Comment: React.FC<CommentProps> = ({ 
-    comment, 
-    depth = 0, 
-    maxDepth = 8,
-    onPress 
-  }) => {
-    const [isCollapsed, setIsCollapsed] = useState(depth > 3);
-    const { colors } = useTheme();
+  return (
+    <View style={[styles.commentContainer, { 
+      padding: 12,
+      marginVertical: 4,
+      borderRadius: 8,
+      borderLeftWidth: 1,
+      borderColor: colors.commentBorder,
+      backgroundColor: colors.secondary,
+    }]}>
+      <View style={styles.commentHeader}>
+        <Animated.View style={[{ 
+          width: 100, 
+          height: 16, 
+          backgroundColor: colors.border,
+          borderRadius: 4 
+        }, animatedStyle]} />
+        <Animated.View style={[{ 
+          width: 50, 
+          height: 12, 
+          backgroundColor: colors.border,
+          borderRadius: 4 
+        }, animatedStyle]} />
+      </View>
+      <Animated.View style={[{ 
+        width: '100%', 
+        height: 100, 
+        backgroundColor: colors.border,
+        borderRadius: 4 
+      }, animatedStyle]} />
+    </View>
+  );
+});
+
+const CommentSeparator = memo(() => (
+  <View style={styles.commentSeparator} />
+));
+
+const SingleComment = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }: { 
+  comment: HN_ITEM_TYPE, 
+  depth: number, 
+  maxDepth: number,
+  onToggle: () => void,
+  isCollapsed: boolean 
+}) => {
+  const { colors } = useTheme();
+
+  const depthColor = [
+    '#FFCDD2',
+    '#F8BBD0',
+    '#E1BEE7',
+  ]
+
+  const htmlViewStyles = StyleSheet.create({
+    p: { marginVertical: 0, fontSize: 14, lineHeight: 20, color: colors.text },
+    a: { color: colors.link, textDecorationLine: 'underline' as 'underline' },
+    pre: { backgroundColor: colors.secondary, padding: 8, borderRadius: 4, color: colors.text },
+    code: { fontFamily: 'monospace', backgroundColor: colors.secondary, color: colors.text },
+    blockquote: { borderLeftWidth: 4, borderLeftColor: colors.border, paddingLeft: 8, color: colors.textSecondary },
+    ul: { marginVertical: 8, paddingLeft: 20, color: colors.text },
+    ol: { marginVertical: 8, paddingLeft: 20, color: colors.text },
+    li: { marginVertical: 4, color: colors.text },
+    h1: { fontSize: 20, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+    h2: { fontSize: 18, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+    h3: { fontSize: 16, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+    h4: { fontSize: 14, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+    h5: { fontSize: 12, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+    h6: { fontSize: 10, fontWeight: 'bold', marginVertical: 8, color: colors.text },
+    strong: { fontWeight: 'bold', color: colors.text },
+    em: { fontStyle: 'italic', color: colors.text },
+    i: { fontStyle: 'italic', color: colors.text },
+    b: { fontWeight: 'bold', color: colors.text },
+    div: { color: colors.text }
+  });
   
-    const handlePress = () => {
-      if (onPress) {
-        onPress(comment);
+  return (
+    <TouchableOpacity 
+      onPress={onToggle}
+      style={[
+        styles.commentContainer, 
+        {
+          borderLeftWidth: depth === 0 ? 0 : 1,
+          marginLeft: depth * 12,
+          borderColor: depthColor[depth % 3]
+        }
+      ]}
+    >
+      <View style={styles.commentHeader}>
+        <Text style={[styles.username, { color: colors.link }]}>{comment.by}</Text>
+        <Text style={[styles.timestamp, { color: colors.text }]}>
+          {formatDistanceToNow(fromUnixTime(comment.time))}
+        </Text>
+      </View>
+      <HTMLView 
+        value={`<div>${comment.text}</div>`} 
+        stylesheet={htmlViewStyles} 
+        addLineBreaks={false}
+        renderNode={(node, index) => {
+          // Add custom node rendering optimization if needed
+          return undefined;
+        }}
+      />
+      {Array.isArray(comment.kids) && comment.kids?.length > 0 && (
+        <Text style={[styles.repliesCount, { color: colors.text }]}>
+          {isCollapsed ? '► ' : '▼ '}{comment.kids.length} {comment.kids.length === 1 ? 'reply' : 'replies'}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+});
+
+const Comments = memo(({commentIDs, depth = 0, maxDepth = 3}: {commentIDs: number[], depth: number, maxDepth: number}) => {
+  const [collapsedComments, setCollapsedComments] = useState<Set<number>>(new Set());
+  const { colors } = useTheme();
+
+  const commentQuery = useQuery({
+    queryKey: ['comments', commentIDs],
+    queryFn: () => fetchItemsByIdsQuery(commentIDs),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  const toggleComment = useCallback((commentId: number) => {
+    setCollapsedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
       } else {
-        setIsCollapsed(!isCollapsed);
+        newSet.add(commentId);
       }
-    };
-  
-    const formatDate = (timestamp: number): string => {
-      return formatDistanceToNow(fromUnixTime(timestamp), { addSuffix: true });
-    };
-  
-    const htmlViewStyles = StyleSheet.create({
-      p: { marginVertical: 0, fontSize: 14, lineHeight: 20, color: colors.text },
-      a: { color: colors.link, textDecorationLine: 'underline' as 'underline' },
-      pre: { backgroundColor: colors.secondary, padding: 8, borderRadius: 4, color: colors.text },
-      code: { fontFamily: 'monospace', backgroundColor: colors.secondary, color: colors.text },
-      blockquote: { borderLeftWidth: 4, borderLeftColor: colors.border, paddingLeft: 8, color: colors.textSecondary },
-      ul: { marginVertical: 8, paddingLeft: 20, color: colors.text },
-      ol: { marginVertical: 8, paddingLeft: 20, color: colors.text },
-      li: { marginVertical: 4, color: colors.text },
-      h1: { fontSize: 20, fontWeight: 'bold', marginVertical: 8, color: colors.text },
-      h2: { fontSize: 18, fontWeight: 'bold', marginVertical: 8, color: colors.text },
-      h3: { fontSize: 16, fontWeight: 'bold', marginVertical: 8, color: colors.text },
-      h4: { fontSize: 14, fontWeight: 'bold', marginVertical: 8, color: colors.text },
-      h5: { fontSize: 12, fontWeight: 'bold', marginVertical: 8, color: colors.text },
-      h6: { fontSize: 10, fontWeight: 'bold', marginVertical: 8, color: colors.text },
-      strong: { fontWeight: 'bold', color: colors.text },
-      em: { fontStyle: 'italic', color: colors.text },
-      i: { fontStyle: 'italic', color: colors.text },
-      b: { fontWeight: 'bold', color: colors.text },
-      div: { color: colors.text }
+      return newSet;
     });
-  
-    if (comment.deleted || comment.dead) {
-      return null;
-    }
-  
-    const backgroundColor = depth % 2 === 0 ? colors.secondary : colors.primary;
-  
-    if (depth > maxDepth) {
-      return (
-        <TouchableOpacity 
-          style={[styles.commentContainer, { backgroundColor }]}
-          onPress={handlePress}
-        >
-          <Text style={[styles.moreReplies, { color: colors.link }]}>
-            View more replies...
-          </Text>
-        </TouchableOpacity>
-      );
-    }
-  
+  }, []);
+
+  const renderItem = useCallback(({ item }: { item: HN_ITEM_TYPE }) => {
+    const isCollapsed = collapsedComments.has(item.id);
     return (
-      <View style={{ marginLeft: depth * 12 }}>
-        <TouchableOpacity 
-          style={[styles.commentContainer, { backgroundColor }]}
-          onPress={handlePress}
-          activeOpacity={0.7}
-        >
-          <View style={styles.commentHeader}>
-            <Text style={[styles.username, { color: colors.link }]}>{comment.by}</Text>
-            <Text style={[styles.timestamp, { color: colors.text }]}>{formatDate(comment.time)}</Text>
-          </View>
-          
-          {!isCollapsed && comment.text && (
-            <HTMLView
-              value={`<div>${comment.text}</div>`}
-              stylesheet={htmlViewStyles}
-              addLineBreaks={false}
-            />
-          )}
-  
-          {comment.children?.length > 0 && (
-            <Text style={[styles.repliesCount, { color: colors.text }]}>
-              {isCollapsed ? '► ' : '▼ '}
-              {comment.children.length} {comment.children.length === 1 ? 'reply' : 'replies'}
-            </Text>
-          )}
-        </TouchableOpacity>
-  
-        {!isCollapsed && comment.children?.map((child) => (
-          <Comment 
-            key={child.id} 
-            comment={child} 
+      <>
+        <SingleComment
+          comment={item}
+          depth={depth}
+          maxDepth={maxDepth}
+          onToggle={() => toggleComment(item.id)}
+          isCollapsed={isCollapsed}
+        />
+        {!isCollapsed && item.kids && (
+          <Comments
+            commentIDs={item.kids}
             depth={depth + 1}
             maxDepth={maxDepth}
-            onPress={onPress}
           />
-        ))}
+        )}
+      </>
+    );
+  }, [depth, maxDepth, collapsedComments, toggleComment]);
+
+  if (!commentIDs.length) return null;
+  if (commentQuery.isLoading) return <CommentSkeleton />;
+  if (commentQuery.isError || !commentQuery.data) {
+    return <Text>Error loading comments</Text>;
+  }
+
+  return (
+    <FlatList
+      data={commentQuery.data}
+      renderItem={renderItem}
+      keyExtractor={item => item.id.toString()}
+      ItemSeparatorComponent={CommentSeparator}
+      maxToRenderPerBatch={10}
+      windowSize={5}
+      removeClippedSubviews={true}
+      initialNumToRender={10}
+    />
+  );
+});
+
+const CommentsScreen = () => {
+  const postData = JSON.parse(useLocalSearchParams().postData as string) as HN_ITEM_TYPE;
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const insets = useSafeAreaInsets();
+  const {colors} = useTheme();
+  const router = useRouter();
+
+  if(!postData.kids || postData.kids.length === 0){
+    return (
+      <View style={styles.centerContainer}>
+        <Text>No comments found</Text>
       </View>
     );
-  };
-  
-  // Main Comments Viewer Component
-  const CommentsViewer: React.FC<CommentsViewerProps> = ({ 
-    parentId,
-    onError,
-    initialMaxDepth = 8,
-    onCommentPress
-  }) => {
-    const [comments, setComments] = useState<CommentTreeNode | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
-    const [refreshing, setRefreshing] = useState(false);
-    const { colors } = useTheme();
-  
-    const loadComments = async () => {
-      try {
-        setLoading(true);
-        const loader = new CommentLoader();
-        const commentTree = await loader.getFormattedCommentTree(parentId);
-        setComments(commentTree);
-        setError(null);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Unknown error occurred');
-        setError(error);
-        onError?.(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      loadComments();
-    }, [parentId]);
-  
-    const onRefresh = async () => {
-      setRefreshing(true);
-      await loadComments();
-      setRefreshing(false);
-    };
-  
-    if (loading) {
-      return <Loader />
-    }
-  
-    if (error) {
-      return (
-        <View style={[styles.errorContainer, { backgroundColor: colors.errorBackground }]}>
-          <Text style={[styles.errorText, { color: colors.errorText }]}>Error loading comments: {error.message}</Text>
-        </View>
-      );
-    }
-  
-    if (!comments) {
-      return (
-        <View style={styles.centerContainer}>
-          <Text>No comments found</Text>
-        </View>
-      );
-    }
-  
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        >
-          <Comment 
-            comment={comments} 
-            maxDepth={initialMaxDepth}
-            onPress={onCommentPress}
-          />
-        </ScrollView>
-      </SafeAreaView>
-    );
-  };
-  
-  
-export default function Comments() {
-    const commentIds = (useLocalSearchParams().commentIds as string).split(',');
-    const storyURL = useLocalSearchParams().storyURL as string;
-    const title = useLocalSearchParams().title as string;
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const insets = useSafeAreaInsets();
+  }
 
-    const router = useRouter();
-    const { colors } = useTheme();
-  
-    return (
-        <GestureHandlerRootView style={{flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
-            <View style={[styles.container, { backgroundColor: colors.primary }]}>
-                <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <TouchableOpacity onPress={() => router.back()} style={{padding: 10}}>
-                        <Text style={{color: colors.backButton}}>Back</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
-                        <Text style={{color: colors.backButton}}>Open Article</Text>
-                    </TouchableOpacity>
-                 </View>
-                <CommentsViewer 
-                    parentId={Number(commentIds[0])}
-                    onError={(error) => console.error(error)}
-                    initialMaxDepth={8}
-                />
-                <BottomSheetBroswer ref={bottomSheetRef} url={storyURL} />
+  return (
+    <GestureHandlerRootView style={{flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
+      <View style={[styles.container, { backgroundColor: colors.primary }]}>
+        <Text style={[styles.title, { color: colors.text }]}>{postData.title}</Text>
+        <View style={{flexDirection: 'row', padding: 10}}>
+          {[["by", "user"], ["score", "like2"], ["time", "clockcircleo"]].map((key) => (
+            <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 10}} key={key[0]}>
+              <AntDesign name={key[1] as "like2" | "user" | "clockcircleo"} size={12} color={colors.text} style={{marginRight: 5}} />
+              <Text style={{color: colors.text, fontSize: 12, fontWeight: 'regular'}}>
+                {key[0] === "time" ? formatDistanceToNow(fromUnixTime(postData.time)) : postData[key[0] as keyof HN_ITEM_TYPE]}
+              </Text>
             </View>
-        </GestureHandlerRootView>
-    );
-}
+          ))}
+        </View>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <TouchableOpacity onPress={() => router.back()} style={{padding: 10}}>
+            <Text style={{color: colors.backButton}}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
+            <Text style={{color: colors.backButton}}>Open Article</Text>
+          </TouchableOpacity>
+        </View>
+        {/* <ScrollView style={styles.commentList}> */}
+          <Comments commentIDs={postData.kids} depth={0} maxDepth={3} />
+        {/* </ScrollView> */}
+        <BottomSheetBroswer ref={bottomSheetRef} url={postData.url} />
+      </View>
+    </GestureHandlerRootView>
+  );
+
+};
+
+const OptimizedCommentsScreen = React.memo(CommentsScreen);
+
+export default OptimizedCommentsScreen;
+
