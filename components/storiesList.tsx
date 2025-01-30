@@ -16,7 +16,7 @@ export default function StoriesList({ postIds, currentSelected }: { postIds: str
 
     const { data: newStories, isLoading } = useQuery({
         queryKey: ['stories', postIds.map(Number), lastLoadedIndex, STORY_FETCH_LIMIT],
-        queryFn: ()=> fetchItemsByIdsQuery(['stories', postIds.map(Number), lastLoadedIndex, STORY_FETCH_LIMIT]),
+        queryFn: ()=> fetchItemsByIdsQuery(postIds.map(Number), lastLoadedIndex, STORY_FETCH_LIMIT),
     });
 
     useEffect(() => {
@@ -43,7 +43,7 @@ export default function StoriesList({ postIds, currentSelected }: { postIds: str
             <Animated.FlatList
                 data={storiesData}
                 renderItem={renderItem}
-                keyExtractor={(item) => `story-${item.id}`} // Updated keyExtractor
+                keyExtractor={(item) => `story-${item.id}`} 
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={0.5}
                 style={{backgroundColor: colors.primary}}
