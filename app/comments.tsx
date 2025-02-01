@@ -17,6 +17,13 @@ import React from "react";
 
 // const COMMENT_FETCH_LIMIT = 10;
 
+/**
+ * TO FIX: 
+ * - comment collapse logic
+ * - clean out the code
+ * - some ui fixes, etc.
+ */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
