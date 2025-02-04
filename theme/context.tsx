@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Colors } from './colors';
 import { Appearance } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -19,11 +20,27 @@ const ThemeContext = createContext<ThemeContextType>({
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>('system');
   const [currentColors, setCurrentColors] = useState(Colors.light);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const loadThemeAndSetColors = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme');
+        if (savedTheme) {
+          setTheme(savedTheme as Theme);
+        }
+      } catch (error) {
+        console.error('Failed to load theme:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadThemeAndSetColors();
+
     const updateColors = () => {
-      const colorScheme = Appearance.getColorScheme();
       if (theme === 'system') {
+        const colorScheme = Appearance.getColorScheme();
         setCurrentColors(colorScheme === 'dark' ? Colors.dark : Colors.light);
       } else {
         setCurrentColors(Colors[theme]);
@@ -31,23 +48,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     updateColors();
-
-    const subscription = Appearance.addChangeListener(() => {
-      if (theme === 'system') {
-        updateColors();
-      }
-    });
-
+    const subscription = Appearance.addChangeListener(updateColors);
     return () => subscription.remove();
   }, [theme]);
 
-  const toggleTheme = (selectedTheme?: Theme) => {
+  const toggleTheme = useCallback((selectedTheme?: Theme) => {
     if (selectedTheme) {
       setTheme(selectedTheme);
+      AsyncStorage.setItem('theme', selectedTheme);
     } else {
-      setTheme(prev => prev === 'light' ? 'dark' : 'light');
+      const newTheme = theme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+      AsyncStorage.setItem('theme', newTheme);
     }
-  };
+  }, [theme]);
+
+  if (isLoading) return null;
 
   return (
     <ThemeContext.Provider value={{
