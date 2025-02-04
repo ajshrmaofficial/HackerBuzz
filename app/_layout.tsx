@@ -1,11 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack, useRouter } from "expo-router";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { Stack } from "expo-router";
 import { ThemeProvider, useTheme } from "@/theme/context";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useMemo } from "react";
+import SettingsIcon from "@/components/settingsIcon";
+import BookmarkIcon from "@/components/bookmarkIcon";
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { BookmarkProvider } from "./bookmarks";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const queryClient = new QueryClient();
 
@@ -18,56 +21,37 @@ export default function RootLayout() {
     return null;
   }
 
-  const SettingsIcon = () => {
-    const router = useRouter();
-    const { colors } = useTheme();
-
-    const onPress = () => {
-      router.push({pathname: '/settings'});
-    }
-
-/**
-  * Currently, the `onPress` function is not working as expected.
-  * When trying to call onPress on HeaderRight, the screen is not navigating to the settings screen.
-  * Refer - https://github.com/expo/expo/issues/29489
-  * That is why using onPressIn for now.  
-*/
-
-    return(
-      <TouchableOpacity onPressIn={onPress} style={{padding: 10}}> 
-        <AntDesign name="setting" size={24} color={colors.text} />
-      </TouchableOpacity>
-    )
-  }
-
+  
   const Layout = () => {
     const { colors, theme } = useTheme();
+
+    const screenOptions: NativeStackNavigationOptions = useMemo(() => ({
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: colors.primary,
+      },
+      headerTitleStyle: {
+        fontFamily: 'Comic-Font',
+        fontSize: 24,
+        color: colors.text,
+      },
+      headerTintColor: colors.text,
+      headerRight: () => <><BookmarkIcon/><SettingsIcon/></>,
+      animation: 'fade',
+      animationDuration: 200
+    }), [colors]);
+
     return (
       <>
         <StatusBar
           style={theme === 'system' ? 'auto' : theme === 'dark' ? 'light' : 'dark'}
-          backgroundColor={useTheme().colors.primary}
+          backgroundColor={colors.primary}
         />
-        <Stack 
-        screenOptions={{
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: colors.primary,
-          },
-          headerTitleStyle: {
-            fontFamily: 'Comic-Font',
-            fontSize: 24,
-            color: colors.text,
-          },
-          headerTintColor: colors.text,
-          headerRight: () => <SettingsIcon/>,
-          animation: 'fade',
-          animationDuration: 200
-        }}
-      >
+        <Stack screenOptions={screenOptions}>
         <Stack.Screen name="index" options={{title: "HackerBuzz"}} />
         <Stack.Screen name="comments" options={{title: "Comments", headerShown: false, presentation: 'containedTransparentModal'}} />
         <Stack.Screen name="settings" options={{title: "Settings", headerRight: ()=>null, presentation: 'containedTransparentModal'}} />
+        <Stack.Screen name="bookmarks" options={{title: "Bookmarks", headerRight: ()=>null, presentation: 'containedTransparentModal'}} />
       </Stack>
       </>
     );
@@ -76,7 +60,11 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Layout />
+        <BookmarkProvider>
+          <GestureHandlerRootView style={{flex: 1}}>
+            <Layout />
+          </GestureHandlerRootView>
+        </BookmarkProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )
