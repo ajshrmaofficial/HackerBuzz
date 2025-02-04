@@ -1,11 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState, memo, useCallback } from "react";
+import { useRef, useState, memo, useCallback, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
 import HTMLView from 'react-native-htmlview';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetBroswer } from "@/components/bottomSheetBrowser";
 import { fetchItemsByIdsQuery } from "@/utility/HN_Firebase";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { formatDistanceToNow, fromUnixTime } from 'date-fns';
 import { useTheme } from "@/theme/context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,6 +13,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import Animated, { withRepeat, withSequence, withTiming, useAnimatedStyle, useDerivedValue } from "react-native-reanimated";
 import React from "react";
+// import * as Sharing from 'expo-sharing';
+import { Share } from "react-native";
 
 // const COMMENT_FETCH_LIMIT = 10;
 
@@ -135,9 +136,9 @@ const SingleComment = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }:
   const { colors } = useTheme();
 
   const depthColor = [
-    '#FFCDD2',
-    '#F8BBD0',
-    '#E1BEE7',
+    '#FF5722', // Vibrant red
+    '#4CAF50', // Vibrant green
+    '#2196F3', // Vibrant blue
   ]
 
   const htmlViewStyles = StyleSheet.create({
@@ -200,7 +201,6 @@ const SingleComment = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }:
 
 const Comments = memo(({commentIDs, depth = 0, maxDepth = 3}: {commentIDs: number[], depth: number, maxDepth: number}) => {
   const [collapsedComments, setCollapsedComments] = useState<Set<number>>(new Set());
-  const { colors } = useTheme();
 
   const commentQuery = useQuery({
     queryKey: ['comments', commentIDs],
@@ -269,18 +269,41 @@ const CommentsScreen = () => {
   const {colors} = useTheme();
   const router = useRouter();
 
-  if(!postData.kids || postData.kids.length === 0){
+  if (!postData) {
     return (
-      <View style={styles.centerContainer}>
-        <Text>No comments found</Text>
+      <View style={[styles.centerContainer, { backgroundColor: colors.primary }]}>
+        <Text style={{color: colors.text}}>No post data found</Text>
       </View>
     );
   }
 
+  const shareFn = async () => {
+    const shareObject = {
+      message: `${postData.title}\n${postData.url}`,
+      url: undefined,
+      title: postData.title,
+    };
+    try {
+      if(postData.url)
+      await Share.share(shareObject);
+   } catch (error) {
+      console.error("Failed to share post:", error);
+   }
+  }
+
+  useEffect(()=>{
+    const timeout = setTimeout(() => {
+      if (!postData.kids || postData.kids.length <= 2) {
+        bottomSheetRef.current?.snapToIndex(8);
+      }
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [])
+
   return (
-    <GestureHandlerRootView style={{flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
-      <View style={[styles.container, { backgroundColor: colors.primary }]}>
-        <Text style={[styles.title, { color: colors.text }]}>{postData.title}</Text>
+    <View style={[styles.container, { backgroundColor: colors.primary, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <Text style={[styles.title, { color: colors.text }]}>{postData.title}</Text>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <View style={{flexDirection: 'row', padding: 10}}>
           {[["by", "user"], ["score", "like2"], ["time", "clockcircleo"]].map((key) => (
             <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 10}} key={key[0]}>
@@ -291,20 +314,29 @@ const CommentsScreen = () => {
             </View>
           ))}
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <TouchableOpacity onPress={() => router.back()} style={{padding: 10}}>
-            <Text style={{color: colors.backButton}}>Back</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
-            <Text style={{color: colors.backButton}}>Open Article</Text>
-          </TouchableOpacity>
+        <View style={{flexDirection: 'row', padding: 10}}>
+          <AntDesign name="sharealt" size={12} color='blue' style={{marginRight: 5}} onPress={shareFn} />
+          {/* <Feather name="bookmark" size={12} color={colors.text} style={{marginRight: 5}} /> */}
         </View>
-        {/* <ScrollView style={styles.commentList}> */}
-          <Comments commentIDs={postData.kids} depth={0} maxDepth={3} />
-        {/* </ScrollView> */}
-        <BottomSheetBroswer ref={bottomSheetRef} url={postData.url} />
       </View>
-    </GestureHandlerRootView>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <TouchableOpacity onPress={() => router.back()} style={{padding: 10}}>
+          <Text style={{color: colors.backButton}}>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
+          <Text style={{color: colors.backButton}}>Open Article</Text>
+        </TouchableOpacity>
+      </View>
+      {postData.kids && postData.kids.length>0 && <Comments commentIDs={postData.kids} depth={0} maxDepth={3} />}
+      {
+        (!postData.kids || postData.kids.length === 0) && (
+          <View style={styles.centerContainer}>
+            <Text style={{color: colors.text}}>No comments found</Text>
+          </View>
+        )
+      }
+      <BottomSheetBroswer ref={bottomSheetRef} url={postData.url} />
+    </View>
   );
 
 };
