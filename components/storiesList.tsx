@@ -1,13 +1,12 @@
 import { HN_ITEM_TYPE } from "@/utility/definitions";
 import { useEffect, useState, useCallback } from "react";
-import { Text } from "react-native";
 import StoryTile from "./storyTile";
 import { fetchItemsByIdsQuery } from "@/utility/HN_Firebase";
 import { useQuery } from "@tanstack/react-query";
-import Animated, { FadeInUp, FadeOut, LinearTransition } from "react-native-reanimated";
+import Animated, { FadeOut, LinearTransition } from "react-native-reanimated";
 import { useTheme } from "@/theme/context";
 
-const STORY_FETCH_LIMIT = 10;
+const STORY_FETCH_LIMIT = 15;
 
 export default function StoriesList({ postIds, currentSelected }: { postIds: string[], currentSelected: string }) {
     const [lastLoadedIndex, setLastLoadedIndex] = useState(STORY_FETCH_LIMIT);
@@ -45,13 +44,12 @@ export default function StoriesList({ postIds, currentSelected }: { postIds: str
                 renderItem={renderItem}
                 keyExtractor={(item) => `story-${item.id}`} 
                 onEndReached={handleEndReached}
-                onEndReachedThreshold={0.5}
+                onEndReachedThreshold={0.7}
                 style={{backgroundColor: colors.primary}}
                 exiting={FadeOut}
                 layout={LinearTransition.springify()}
                 itemLayoutAnimation={LinearTransition.springify()}
             />
-            {isLoading && <Animated.View entering={FadeInUp} style={{ borderWidth: 1, margin: 3, padding: 3, borderColor: colors.text, width: '100%', borderRadius: 5, position: 'absolute', bottom: 0, zIndex: 1 }}><Text style={{ color: colors.text }}>Loading...</Text></Animated.View>}
         </Animated.View>
     );
 }
