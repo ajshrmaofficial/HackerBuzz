@@ -7,6 +7,7 @@ import { HN_API_ITEM_TYPE } from "@/utility/definitions";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "@/theme/context";
 import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const storyTypeArr = ["beststories", "newstories", "topstories",  "askstories", "showstories", "jobstories"];
 
@@ -55,6 +56,7 @@ function StoryTypeSelector({ types, onSelect, currentSelected }: { types: string
 
 export default function Home() {
   const [selectedStoryType, setSelectedStoryType] = useState<HN_API_ITEM_TYPE>("beststories");
+  const insets = useSafeAreaInsets();
   const storyIdsQuery = useQuery({
     queryKey: ['storyIds', selectedStoryType],
     queryFn: () => fetch(selectedStoryType),
@@ -63,10 +65,10 @@ export default function Home() {
   });
 
   return (
-    <>
+    <View style={{paddingBottom: insets.bottom, flex: 1, }}>
       <StoryTypeSelector types={storyTypeArr} currentSelected={selectedStoryType} onSelect={setSelectedStoryType} />
       {storyIdsQuery.isLoading ? <Loader/> : <StoriesList currentSelected={selectedStoryType} postIds={storyIdsQuery.data || []} />}
-    </>
+    </View>
   );
 }
 
