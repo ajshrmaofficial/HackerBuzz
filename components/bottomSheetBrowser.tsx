@@ -1,6 +1,6 @@
-import BottomSheet, { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useCallback, useState, forwardRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import WebView from "react-native-webview";
 import { WebViewProgressEvent } from "react-native-webview/lib/WebViewTypes";
 import { useTheme } from "@/theme/context";
