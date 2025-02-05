@@ -9,12 +9,13 @@ import { formatDistanceToNow, fromUnixTime } from 'date-fns';
 import { useTheme } from "@/theme/context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HN_ITEM_TYPE } from "@/utility/definitions";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import Animated, { withRepeat, withSequence, withTiming, useAnimatedStyle, useDerivedValue } from "react-native-reanimated";
 import React from "react";
 // import * as Sharing from 'expo-sharing';
 import { Share } from "react-native";
+import { useBookmarks } from "../utility/bookmarkContext";
 
 // const COMMENT_FETCH_LIMIT = 10;
 
@@ -268,6 +269,7 @@ const CommentsScreen = () => {
   const insets = useSafeAreaInsets();
   const {colors} = useTheme();
   const router = useRouter();
+  const {addBookmark} = useBookmarks();
 
   if (!postData) {
     return (
@@ -279,7 +281,7 @@ const CommentsScreen = () => {
 
   const shareFn = async () => {
     const shareObject = {
-      message: `${postData.title}\n${postData.url}`,
+      message: `${postData.title}\nArticle: ${postData.url}\nPost: https://news.ycombinator.com/item?id=${postData.id}`,
       url: undefined,
       title: postData.title,
     };
@@ -289,6 +291,10 @@ const CommentsScreen = () => {
    } catch (error) {
       console.error("Failed to share post:", error);
    }
+  }
+
+  const addBookmarkFn = () => {
+    addBookmark(postData);
   }
 
   useEffect(()=>{
@@ -315,8 +321,12 @@ const CommentsScreen = () => {
           ))}
         </View>
         <View style={{flexDirection: 'row', padding: 10}}>
-          <AntDesign name="sharealt" size={12} color='blue' style={{marginRight: 5}} onPress={shareFn} />
-          {/* <Feather name="bookmark" size={12} color={colors.text} style={{marginRight: 5}} /> */}
+          <TouchableOpacity onPress={shareFn}>
+            <AntDesign name="sharealt" size={20} color={colors.backButton} style={{marginRight: 15}} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={addBookmarkFn}>
+            <Feather name="bookmark" size={22} color={colors.backButton} style={{marginRight: 5}} />
+          </TouchableOpacity>
         </View>
       </View>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
