@@ -7,7 +7,7 @@ import React, { useMemo } from "react";
 import SettingsIcon from "@/components/settingsIcon";
 import BookmarkIcon from "@/components/bookmarkIcon";
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { BookmarkProvider } from "./bookmarks";
+import { BookmarkProvider } from "../utility/bookmarkContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const queryClient = new QueryClient();
@@ -21,7 +21,6 @@ export default function RootLayout() {
     return null;
   }
 
-  
   const Layout = () => {
     const { colors, theme } = useTheme();
 
