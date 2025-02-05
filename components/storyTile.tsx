@@ -1,14 +1,9 @@
 import { HN_ITEM_TYPE } from "@/utility/definitions";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import * as WebBrowser from "expo-web-browser";
-import React, { useRef } from "react";
+import React from "react";
 import { Router, useRouter } from "expo-router";
 import Animated, { FadeInUp, LinearTransition } from "react-native-reanimated";
-import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useTheme } from "@/theme/context";
-import Feather from '@expo/vector-icons/Feather';
-import { useBookmarks } from "@/app/bookmarks";
-import * as Haptics from 'expo-haptics';
 
 const styles = StyleSheet.create({
   container: {
@@ -40,10 +35,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const openInBrowser = async (url: string | undefined) => {
-  if (url) await WebBrowser.openBrowserAsync(url);
-};
-
 const openStory = async (story: HN_ITEM_TYPE, router: Router) => {
   router.push({pathname: '/comments', params: {postData: JSON.stringify(story)}});
 }
@@ -53,44 +44,15 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 export default function StoryTile({ story }: { story: HN_ITEM_TYPE }) {
   const { colors } = useTheme();
   const router = useRouter();
-  const { addBookmark } = useBookmarks();
-  const swipeableRef = useRef<SwipeableMethods>(null);
-
-  const renderLeftActions = () => {
-    return (
-      <View style={{ backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', width: 90 }}>
-        <Feather name="globe" size={24} color={colors.text} />
-      </View>
-    );
-  }
-
-  const renderRightActions = () => {
-    return (
-      <View style={{ backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', width: 90 }}>
-        <Feather name="bookmark" size={24} color={colors.text} />
-      </View>
-    );
-  }
-
-  const swipeFn = (direction: string) => {
-    if (direction === 'left') {
-      openInBrowser(story?.url);
-    } else {
-      addBookmark(story);
-    }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);  
-    swipeableRef.current?.close();
-  }
 
   return (
-    <Swipeable ref={swipeableRef} friction={2} leftThreshold={100} rightThreshold={100} renderLeftActions={renderLeftActions} renderRightActions={renderRightActions} onSwipeableOpen={swipeFn}>
       <AnimatedTouchable
-        entering={FadeInUp}
+        entering={FadeInUp.springify()}
         layout={LinearTransition.springify()}
         onPress={() => openStory(story, router)}
         activeOpacity={0.8}
-        style={[styles.container, { borderColor: colors.border, backgroundColor: colors.primary }]}
       >
+        <View style={[styles.container, { borderColor: colors.border, backgroundColor: colors.primary }]}>
         <Text style={[styles.title, { color: colors.text }]}>{story.title}</Text>
         <View>
           <View style={styles.flexRow}>
@@ -111,7 +73,8 @@ export default function StoryTile({ story }: { story: HN_ITEM_TYPE }) {
             <Text style={[styles.misc, { color: colors.text }]}>💬 {story.kids.length}</Text>
           )}
         </View>
+        </View>
       </AnimatedTouchable>
-    </Swipeable>
   );
 }
+
