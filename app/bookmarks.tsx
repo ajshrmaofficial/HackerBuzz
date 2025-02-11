@@ -8,20 +8,19 @@ export default function Bookmarks() {
   const { bookmarks } = useBookmarks();
 
   const ListEmptyComponent = () => (
-    <View style={{ alignItems: "center", justifyContent: "center" }}>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <Text style={{ color: colors.text }}>No bookmarks found</Text>
     </View>
   );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.primary }]}>
-      <FlatList
+      {bookmarks.size > 0 && <FlatList
         data={Array.from(bookmarks)}
         renderItem={({ item }) => <StoryTile id={item} />}
         keyExtractor={(item) => `story-${item}`}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={ListEmptyComponent}
-      />
+      />}
+      {bookmarks.size === 0 && <ListEmptyComponent />}
     </View>
   );
 }
@@ -32,7 +31,5 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
