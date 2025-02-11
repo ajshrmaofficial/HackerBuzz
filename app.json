@@ -2,7 +2,7 @@
   "expo": {
     "name": "HackerBuzz",
     "slug": "hackerbuzz",
-    "owner": "Ajay Sharma",
+    "owner": "ajshrma",
     "contact": "ajshrmaofficial@gmail.com",
     "version": "1.2.2",
     "orientation": "portrait",
@@ -27,9 +27,13 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/hacker-news.jpg",
+          "backgroundColor": "#000000",
+          "dark": {
+            "image": "./assets/images/hacker-news.jpg",
+            "backgroundColor": "#000000"
+          },
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "fadeDurationMs": 200
         }
       ],
       [
