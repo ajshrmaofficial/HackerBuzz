@@ -4,7 +4,7 @@
     "slug": "hackerbuzz",
     "owner": "ajshrma",
     "contact": "ajshrmaofficial@gmail.com",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "orientation": "portrait",
     "icon": "./assets/images/hacker-news.jpg",
     "scheme": "myapp",
