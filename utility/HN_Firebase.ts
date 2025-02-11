@@ -1,4 +1,6 @@
-import { firebase } from '@react-native-firebase/database';
+// import { firebase } from '@react-native-firebase/database';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, get } from 'firebase/database';
 import { HN_API_ITEM_TYPE, HN_ITEM_TYPE } from './definitions';
 
 /**
@@ -10,21 +12,27 @@ import { HN_API_ITEM_TYPE, HN_ITEM_TYPE } from './definitions';
 const HN_Firebase_URL = 'https://hacker-news.firebaseio.com'; 
 const HN_API_Version = 'v0';
 
-firebase.initializeApp({
+const firebaseConfig = {
   databaseURL: HN_Firebase_URL,
-  authDomain: 'hacker-news.firebaseio.com',
-  projectId: 'hacker-news',
-  appId: '1:0:web:0'
-});
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-export const HackerNewsDatabaseRef = firebase
-.app()  
-.database(HN_Firebase_URL);
+// firebase.initializeApp({
+//   databaseURL: HN_Firebase_URL,
+//   authDomain: 'hacker-news.firebaseio.com',
+//   projectId: 'hacker-news',
+//   appId: '1:0:web:0'
+// });
+
+// export const HackerNewsDatabaseRef = firebase
+// .app()  
+// .database(HN_Firebase_URL);
 
 export async function fetch(itemType: HN_API_ITEM_TYPE, itemId?: string | number) {
   const refString = `${HN_API_Version}/${itemType}${itemId ? '/'+itemId : ''}`;
-  const response = (await HackerNewsDatabaseRef.ref(refString).once('value')).val();
-  return response;
+  const snapshot = await get(ref(db, refString));
+  return snapshot.val();
 }
 
 export async function fetchItemsByIds(indexArray: string[] | number[], lastLoadedIndex?: number, threshold?: number): Promise<HN_ITEM_TYPE[]> {
