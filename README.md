@@ -1,50 +1,56 @@
-# Welcome to your Expo app 👋
+<p align="center">
+   <img src="assets/images/hacker-news.jpg" alt="HackerBuzz Logo" width="200" height="200">
+</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# HackerBuzz
 
-## Get started
+HackerBuzz is a mobile application built using React Native and Expo, designed to provide a user-friendly interface for accessing and interacting with news and information.  The app includes features for browsing, bookmarking, and commenting on stories.
 
-1. Install dependencies
+## Features
 
+* **Story Browsing:** Browse and view news stories.
+* **Bookmarking:** Save favorite stories for later reading.
+* **Commenting:** Engage with other users by commenting on stories. (Coming soon...)
+* **Settings:** Customize app settings and preferences.
+* **Onboarding:**  Guided introduction for new users.
+* **Light/Dark Theme Mode:**  (Inferred from `theme` directory)
+
+
+## Get Started
+
+This project uses Expo and React Native.  You will need Node.js and npm (or yarn) installed.
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ajshrmaofficial/HackerBuzz.git
+   ```
+   or fork the repository and clone your fork.
+
+2. **Navigate to the project directory:**
+   ```bash
+   cd HackerBuzz
+   ```
+3. **Install dependencies:**
    ```bash
    npm install
    ```
-
-2. Start the app
-
+   or
    ```bash
-    npx expo start
+   yarn install
+   ```
+4. **Start the development server:**
+   ```bash
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Usage
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+After installing the dependencies and starting the development server, you can access the application using an Expo Go client or by building the application for your specific platform (iOS or Android).  The application provides intuitive navigation for browsing, bookmarking, and commenting on stories.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## Contact Information
 
-When you're ready, run:
+ajshrmaofficial@gmail.com
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Credits
+This app is heavily inspired from [Harmonic for Hacker News](https://github.com/SimonHalvdansson/Harmonic-HN)
