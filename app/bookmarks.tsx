@@ -16,9 +16,9 @@ export default function Bookmarks() {
   return (
     <View style={[styles.container, { backgroundColor: colors.primary }]}>
       <FlatList
-        data={bookmarks}
-        renderItem={({ item }) => <StoryTile story={item} />}
-        keyExtractor={(item) => `story-${item.id}`}
+        data={Array.from(bookmarks)}
+        renderItem={({ item }) => <StoryTile id={item} />}
+        keyExtractor={(item) => `story-${item}`}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={ListEmptyComponent}
       />
@@ -31,6 +31,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    // padding: 16,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
