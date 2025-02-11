@@ -38,6 +38,9 @@
                         <color key="backgroundColor" name="SplashScreenBackground"/>
                         <color key="backgroundColor" name="SplashScreenBackground"/>
                         <color key="backgroundColor" name="SplashScreenBackground"/>
+                        <color key="backgroundColor" name="SplashScreenBackground"/>
+                        <color key="backgroundColor" name="SplashScreenBackground"/>
+                        <color key="backgroundColor" name="SplashScreenBackground"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EXPO-PLACEHOLDER-1" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -82,6 +85,15 @@
         </namedColor>
         <namedColor name="SplashScreenBackground">
             <color alpha="1.000" blue="0.00000000000000" green="0.00000000000000" red="1.00000000000000" customColorSpace="sRGB" colorSpace="custom"/>
+        </namedColor>
+        <namedColor name="SplashScreenBackground">
+            <color alpha="1.000" blue="0.00000000000000" green="0.00000000000000" red="0.00000000000000" customColorSpace="sRGB" colorSpace="custom"/>
+        </namedColor>
+        <namedColor name="SplashScreenBackground">
+            <color alpha="1.000" blue="0.00000000000000" green="0.00000000000000" red="0.00000000000000" customColorSpace="sRGB" colorSpace="custom"/>
+        </namedColor>
+        <namedColor name="SplashScreenBackground">
+            <color alpha="1.000" blue="0.00000000000000" green="0.00000000000000" red="0.00000000000000" customColorSpace="sRGB" colorSpace="custom"/>
         </namedColor>
         <namedColor name="SplashScreenBackground">
             <color alpha="1.000" blue="0.00000000000000" green="0.00000000000000" red="0.00000000000000" customColorSpace="sRGB" colorSpace="custom"/>
