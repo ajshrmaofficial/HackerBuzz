@@ -1,29 +1,29 @@
-import { HN_ITEM_TYPE } from "@/utility/definitions";
-
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface BookmarkContextType {
-    bookmarks: HN_ITEM_TYPE[];
-    addBookmark: (bookmark: HN_ITEM_TYPE) => void;
-    removeBookmark: (bookmark: HN_ITEM_TYPE) => void;
+    bookmarks: Set<number>;
+    addBookmark: (bookmark: number) => void;
+    removeBookmark: (bookmark: number) => void;
+    checkIsBookmark: (bookmark: number) => boolean;
   }
   
   const BookmarkContext = createContext<BookmarkContextType>({
-    bookmarks: [],
+    bookmarks: new Set(),
     addBookmark: () => {},
     removeBookmark: () => {},
+    checkIsBookmark: () => false,
   });
   
   export const BookmarkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [bookmarks, setBookmarks] = useState<HN_ITEM_TYPE[]>([]);
+    const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
   
     useEffect(() => {
       const loadBookmarks = async () => {
         try {
           const savedBookmarks = await AsyncStorage.getItem("bookmarks");
           if (savedBookmarks) {
-            setBookmarks(JSON.parse(savedBookmarks));
+            setBookmarks(new Set(JSON.parse(savedBookmarks)));
           }
         } catch (error) {
           console.error("Failed to load bookmarks:", error);
@@ -32,27 +32,37 @@ interface BookmarkContextType {
   
       loadBookmarks();
     }, [])
+
+    useEffect(() => {
+      const saveBookmarks = async () => {
+        try {
+          await AsyncStorage.setItem("bookmarks", JSON.stringify(Array.from(bookmarks)));
+        } catch (error) {
+          console.error("Failed to save bookmarks:", error);
+        }
+      };
   
-    const addBookmark = (bookmark: HN_ITEM_TYPE) => {
-      if (bookmarks.find((prevBookmark) => prevBookmark.id === bookmark.id)) {
-        return;
-      }
-      setBookmarks((prevBookmarks) => [...prevBookmarks, bookmark]);
-      AsyncStorage.setItem("bookmarks", JSON.stringify([...bookmarks, bookmark]));
-    };
+      saveBookmarks();
+    }, [bookmarks]);
   
-    const removeBookmark = (bookmark: HN_ITEM_TYPE) => {
-      setBookmarks((prevBookmarks) =>
-        prevBookmarks.filter((prevBookmark) => prevBookmark.id !== bookmark.id)
-      );
-      AsyncStorage.setItem(
-        "bookmarks",
-        JSON.stringify(bookmarks.filter((prevBookmark) => prevBookmark.id !== bookmark.id))
-      );
-    }; 
+    const addBookmark = useCallback((id: number) => {
+      setBookmarks(prev => new Set([...prev, id]));
+    }, []);
+  
+    const removeBookmark = useCallback((id: number) => {
+      setBookmarks(prev => {
+        const next = new Set([...prev]);
+        next.delete(id);
+        return next;
+      });
+    }, []);
+
+    const checkIsBookmark = useCallback((id: number) => {
+      return bookmarks.has(id);
+    }, [bookmarks]);
   
     return (
-      <BookmarkContext.Provider value={{ bookmarks, addBookmark, removeBookmark }}>
+      <BookmarkContext.Provider value={{ bookmarks, addBookmark, removeBookmark, checkIsBookmark }}>
         {children}
       </BookmarkContext.Provider>
     );
