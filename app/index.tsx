@@ -2,7 +2,7 @@ import StoriesList from "@/components/storiesList";
 import Loader from "@/components/loader";
 import { fetch } from "@/utility/HN_Firebase";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { HN_API_ITEM_TYPE } from "@/utility/definitions";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "@/theme/context";
@@ -14,7 +14,7 @@ const storyTypeArr = ["beststories", "newstories", "topstories",  "askstories", 
 function StoryTypeSelector({ types, onSelect, currentSelected }: { types: string[], onSelect: (type: HN_API_ITEM_TYPE) => void, currentSelected?: HN_API_ITEM_TYPE }) {
   const { colors } = useTheme();
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(()=>StyleSheet.create({
     selectorContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -39,7 +39,7 @@ function StoryTypeSelector({ types, onSelect, currentSelected }: { types: string
       borderWidth: 1,
       borderColor: colors.text,
     }
-  });
+  }), [colors])
 
   return (
     <View style={styles.selectorContainer}>
@@ -57,17 +57,11 @@ function StoryTypeSelector({ types, onSelect, currentSelected }: { types: string
 export default function Home() {
   const [selectedStoryType, setSelectedStoryType] = useState<HN_API_ITEM_TYPE>("beststories");
   const insets = useSafeAreaInsets();
-  const storyIdsQuery = useQuery({
-    queryKey: ['storyIds', selectedStoryType],
-    queryFn: () => fetch(selectedStoryType),
-    staleTime: 60 * 1000,
-    refetchOnWindowFocus: true,
-  });
 
   return (
     <View style={{paddingBottom: insets.bottom, flex: 1, }}>
       <StoryTypeSelector types={storyTypeArr} currentSelected={selectedStoryType} onSelect={setSelectedStoryType} />
-      {storyIdsQuery.isLoading ? <Loader/> : <StoriesList currentSelected={selectedStoryType} postIds={storyIdsQuery.data || []} />}
+      <StoriesList currentSelectedStoryType={selectedStoryType} />
     </View>
   );
 }
