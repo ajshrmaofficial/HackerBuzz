@@ -42,12 +42,8 @@ export default function Onboarding() {
 
   const onComplete = async () => {
     await AsyncStorage.setItem('userOnboarded', 'true');
-    router.push('/');
+    router.replace('/');
   };
-
-  useEffect(() => {
-    console.log('onboarding screen mounted');
-  }, []);
 
   const renderSlide = ({ item, index }: { item: slide_type, index: number }) => {
     const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
