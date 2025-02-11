@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, Animated, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, Animated, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme/context';

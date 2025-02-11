@@ -4,27 +4,16 @@ import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native
 import HTMLView from 'react-native-htmlview';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetBroswer } from "@/components/bottomSheetBrowser";
-import { fetch, fetchItemsByIdsQuery } from "@/utility/HN_Firebase";
+import { fetch } from "@/utility/HN_Firebase";
 import { formatDistanceToNow, fromUnixTime } from 'date-fns';
 import { useTheme } from "@/theme/context";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HN_ITEM_TYPE } from "@/utility/definitions";
-import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQueries, useQuery } from "@tanstack/react-query";
-// import Animated, { withRepeat, withSequence, withTiming, useAnimatedStyle, useDerivedValue } from "react-native-reanimated";
 import React from "react";
-// import * as Sharing from 'expo-sharing';
 import { Share } from "react-native";
 import { useBookmarks } from "../utility/bookmarkContext";
-
-// const COMMENT_FETCH_LIMIT = 10;
-
-/**
- * TO FIX: 
- * - comment collapse logic
- * - clean out the code
- * - some ui fixes, etc.
- */
 
 const styles = StyleSheet.create({
   container: {

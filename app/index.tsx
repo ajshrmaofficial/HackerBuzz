@@ -1,7 +1,4 @@
 import StoriesList from "@/components/storiesList";
-import Loader from "@/components/loader";
-import { fetch } from "@/utility/HN_Firebase";
-import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { HN_API_ITEM_TYPE } from "@/utility/definitions";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
