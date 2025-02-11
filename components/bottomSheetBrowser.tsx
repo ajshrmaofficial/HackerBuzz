@@ -5,7 +5,7 @@ import WebView from "react-native-webview";
 import { WebViewProgressEvent } from "react-native-webview/lib/WebViewTypes";
 import { useTheme } from "@/theme/context";
 
-const SNAP_POINTS = ['3%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
+const SNAP_POINTS = ['3%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%'];
 
 export const BottomSheetBroswer = forwardRef(({url}: {url?: string}, ref: React.Ref<BottomSheet>) => {
     const [loadProgress, setLoadProgress] = useState<number>(0);
