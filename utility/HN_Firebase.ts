@@ -21,13 +21,13 @@ export const HackerNewsDatabaseRef = firebase
 .app()  
 .database(HN_Firebase_URL);
 
-export async function fetch(itemType: HN_API_ITEM_TYPE, itemId?: number) {
+export async function fetch(itemType: HN_API_ITEM_TYPE, itemId?: string | number) {
   const refString = `${HN_API_Version}/${itemType}${itemId ? '/'+itemId : ''}`;
   const response = (await HackerNewsDatabaseRef.ref(refString).once('value')).val();
   return response;
 }
 
-export async function fetchItemsByIds(indexArray: number[], lastLoadedIndex?: number, threshold?: number): Promise<HN_ITEM_TYPE[]> {
+export async function fetchItemsByIds(indexArray: string[] | number[], lastLoadedIndex?: number, threshold?: number): Promise<HN_ITEM_TYPE[]> {
   const startIndex = lastLoadedIndex && threshold ? lastLoadedIndex - threshold : 0;
   const endIndex = lastLoadedIndex || indexArray.length;
   const newStories: HN_ITEM_TYPE[] = await Promise.all(
@@ -36,6 +36,6 @@ export async function fetchItemsByIds(indexArray: number[], lastLoadedIndex?: nu
   return newStories;
 }
 
-export async function fetchItemsByIdsQuery(indexArray: number[], lastLoadedIndex?: number, threshold?: number){
+export async function fetchItemsByIdsQuery(indexArray: string[] | number[], lastLoadedIndex?: number, threshold?: number){
   return fetchItemsByIds(indexArray, lastLoadedIndex, threshold);
 }
