@@ -4,7 +4,7 @@
 
 # HackerBuzz
 
-HackerBuzz is a mobile application built using React Native and Expo, designed to provide a user-friendly interface for accessing and interacting with news and information.  The app includes features for browsing, bookmarking, and commenting on stories.
+HackerBuzz is a mobile application built using React Native and Expo, designed to provide a user-friendly interface for accessing and interacting with news and information.  The app includes features for browsing, bookmarking, and commenting on stories(not yet...).
 
 ## Features
 
