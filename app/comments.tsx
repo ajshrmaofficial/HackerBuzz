@@ -1,9 +1,9 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState, memo, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, memo, useCallback, useEffect, useMemo, RefObject } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
 import HTMLView from 'react-native-htmlview';
 import BottomSheet from "@gorhom/bottom-sheet";
-import { BottomSheetBroswer } from "@/components/bottomSheetBrowser";
+import BottomSheetBroswer from "@/components/bottomSheetBrowser";
 import { fetch } from "@/utility/HN_Firebase";
 import { formatDistanceToNow, fromUnixTime } from 'date-fns';
 import { useTheme } from "@/theme/context";
@@ -14,6 +14,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Share } from "react-native";
 import { useBookmarks } from "../utility/bookmarkContext";
+import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 
 const styles = StyleSheet.create({
   container: {
@@ -243,10 +244,30 @@ const Comment = memo(({ comment, depth, maxDepth }: {
   );
 });
 
-const Comments = memo(({commentIDs}: {commentIDs: number[]}) => {
+const Header = memo(({ postData, bottomSheetRef }: { postData: HN_ITEM_TYPE, bottomSheetRef: RefObject<BottomSheetMethods> }) => {
+  const { colors } = useTheme();
+  return(
+    <>
+      <Text style={[styles.title, { color: colors.text }]}>{postData.title}</Text>
+      
+      <HeaderActions 
+        postData={postData}
+        bottomSheetRef={bottomSheetRef}
+      />
+
+      {postData.text && (
+        <View style={{padding: 10}}>
+          <HTMLViewer content={postData.text} />
+        </View>
+      )}
+    </>
+  )
+});
+
+const Comments = memo(({postData, bottomSheetRef}: {postData: HN_ITEM_TYPE, bottomSheetRef: RefObject<BottomSheetMethods>}) => {
+  const commentIDs = postData.kids as number[];
 
   const RenderItem = useCallback(({ itemId }: { itemId: number }) => {
-
     const {data, isLoading, isError} = useQuery({
       queryKey: [itemId],
       queryFn: () => fetch("item", itemId),
@@ -273,6 +294,7 @@ const Comments = memo(({commentIDs}: {commentIDs: number[]}) => {
   return (
     <FlatList
       data={commentIDs}
+      ListHeaderComponent={()=><Header postData={postData} bottomSheetRef={bottomSheetRef} />}
       renderItem={({item})=> <RenderItem itemId={item} />}
       keyExtractor={item => item.toString()}
       ItemSeparatorComponent={CommentSeparator}
@@ -286,13 +308,13 @@ const Comments = memo(({commentIDs}: {commentIDs: number[]}) => {
   );
 });
 
-const HeaderActions = memo(({ postData, bottomSheetRef, router }: {
+const HeaderActions = memo(({ postData, bottomSheetRef }: {
   postData: HN_ITEM_TYPE,
   bottomSheetRef: React.RefObject<BottomSheet>,
-  router: any
 }) => {
   const { colors } = useTheme();
   const { addBookmark, removeBookmark, checkIsBookmark } = useBookmarks();
+  const router = useRouter();
   const isBookmarked = checkIsBookmark?.(postData.id) ?? false;
 
   const handleShare = useCallback(async () => {
@@ -355,13 +377,11 @@ const HeaderActions = memo(({ postData, bottomSheetRef, router }: {
   );
 });
 
-
-const CommentsScreen = () => {
+export default memo(function CommentsScreen() {
   const postData = JSON.parse(useLocalSearchParams().postData as string) as HN_ITEM_TYPE;
   const bottomSheetRef = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
   const {colors} = useTheme();
-  const router = useRouter();
 
   if (!postData) {
     return (
@@ -382,22 +402,9 @@ const CommentsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.primary, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <Text style={[styles.title, { color: colors.text }]}>{postData.title}</Text>
       
-      <HeaderActions 
-        postData={postData}
-        bottomSheetRef={bottomSheetRef}
-        router={router}
-      />
-
-      {postData.text && (
-        <View style={{padding: 10}}>
-          <HTMLViewer content={postData.text} />
-        </View>
-      )}
-
       {postData.kids && postData.kids.length > 0 ? (
-        <Comments commentIDs={postData.kids} />
+        <Comments postData={postData} bottomSheetRef={bottomSheetRef} />
       ) : (
         <View style={styles.centerContainer}>
           <Text style={{color: colors.text}}>No comments found</Text>
@@ -408,7 +415,4 @@ const CommentsScreen = () => {
     </View>
   );
 
-};
-
-export default memo(CommentsScreen);
-
+});
