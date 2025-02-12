@@ -1,7 +1,7 @@
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useTheme } from "@/theme/context";
 
-export default function Loader() {
+const Loader = () => {
     const { colors } = useTheme();
     const styles = StyleSheet.create({
         container: {
@@ -15,3 +15,5 @@ export default function Loader() {
         <ActivityIndicator size='large' color={colors.text} />
     </View>
 }
+
+export default Loader;

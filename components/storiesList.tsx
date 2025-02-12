@@ -7,7 +7,7 @@ import { View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import Loader from "./loader";
 
-export default function StoriesList({ currentSelectedStoryType }: { currentSelectedStoryType: HN_API_ITEM_TYPE }) {
+const StoriesList = ({ currentSelectedStoryType }: { currentSelectedStoryType: HN_API_ITEM_TYPE }) => {
     const { colors } = useTheme();
 
     const {data, isLoading} = useQuery({
@@ -30,3 +30,4 @@ export default function StoriesList({ currentSelectedStoryType }: { currentSelec
     );
 }
 
+export default StoriesList;

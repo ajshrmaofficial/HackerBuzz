@@ -5,7 +5,7 @@ import Animated, { FadeInUp } from "react-native-reanimated";
 import { useTheme } from "@/theme/context";
 import { fetch } from "@/utility/HN_Firebase";
 import { useQuery } from "@tanstack/react-query";
-import StoryTileSkeleton from "./StoryTileSkeleton";
+import StoryTileSkeleton from "./storyTileSkeleton";
 
 const styles = StyleSheet.create({
   container: {
@@ -43,7 +43,7 @@ const openStory = async (story: HN_ITEM_TYPE, router: Router) => {
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
-export default function StoryTile({ id }: { id: number }) {
+const StoryTile = ({ id }: { id: number }) => {
   const { colors } = useTheme();
   const router = useRouter();
 
@@ -90,3 +90,4 @@ export default function StoryTile({ id }: { id: number }) {
   );
 }
 
+export default StoryTile;
