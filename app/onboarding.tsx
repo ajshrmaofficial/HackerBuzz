@@ -4,33 +4,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme/context';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 type slide_type = {
   id: number,
-  title: string,
-  description: string,
   image: any
 }
 
 const slides: slide_type[] = [
   {
     id: 1,
-    title: 'Browse Stories',
-    description: 'Swipe left to open in browser, right to bookmark',
-    image: require('../assets/images/hacker-news.jpg')
+    image: require('../assets/images/onboarding1.png')
   },
   {
     id: 2,
-    title: 'Dark Mode',
-    description: 'Switch between light and dark themes',
-    image: require('../assets/images/hacker-news.jpg')
+    image: require('../assets/images/onboarding2.png')
   },
   {
     id: 3,
-    title: 'Get Started',
-    description: 'Start exploring HackerBuzz',
-    image: require('../assets/images/hacker-news.jpg')
+    image: require('../assets/images/onboarding3.png')
+  },
+  {
+    id: 4,
+    image: require('../assets/images/onboarding4.png')
+  },
+  {
+    id: 5,
+    image: require('../assets/images/onboarding5.png')
   }
 ];
 
@@ -58,10 +58,6 @@ export default function Onboarding() {
           source={item.image}
           style={[styles.image, { opacity }]}
         />
-        <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {item.description}
-        </Text>
       </View>
     );
   };
@@ -125,25 +121,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   image: {
-    width: width * 0.8,
-    height: width * 0.8,
+    width: width,
+    height: height,
     resizeMode: 'contain',
     marginBottom: 30,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    paddingHorizontal: 20,
   },
   pagination: {
     flexDirection: 'row',
     position: 'absolute',
-    bottom: 100,
+    bottom: 20,
     alignSelf: 'center',
   },
   dot: {
