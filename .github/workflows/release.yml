@@ -24,10 +24,15 @@ jobs:
       - name: Install Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Decode Keystore File
+        run: |
+          echo "${{ secrets.MYAPP_UPLOAD_STORE_FILE }}" > hackerbuzz-release.keystore.base64
+          base64 --decode hackerbuzz-release.keystore.base64 > android/app/hackerbuzz-release.keystore
+
       - name: Build APKs
         run: |
           cd android
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE=android/app/hackerbuzz-release.keystore -PMYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }} -PMYAPP_UPLOAD_KEY_ALIAS=${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }} -PMYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
 
       - name: Upload APKs as artifacts
         uses: actions/upload-artifact@v4
@@ -46,7 +51,7 @@ jobs:
 
     steps:
       - name: Download APKs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: apks
           path: ./apks
@@ -62,14 +67,52 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload APKs to Release
-        run: |
-          for apk in ./apks/*.apk; do
-            asset_name=$(basename "$apk")
-            echo "Uploading $asset_name..."
-            curl -X POST \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/zip" \
-              --data-binary @"$apk" \
-              "${{ steps.create_release.outputs.upload_url }}?name=$asset_name"
-          done
+      - name: Upload Universal APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apks/hackerbuzz-release-universal-*.apk
+          asset_name: hackerbuzz-release-universal.apk
+          asset_content_type: application/zip
+
+      - name: Upload armeabi-v7a APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apks/hackerbuzz-release-armeabi-v7a-*.apk
+          asset_name: hackerbuzz-release-armeabi-v7a.apk
+          asset_content_type: application/zip
+
+      - name: Upload arm64-v8a APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apks/hackerbuzz-release-arm64-v8a-*.apk
+          asset_name: hackerbuzz-release-arm64-v8a.apk
+          asset_content_type: application/zip
+
+      - name: Upload x86 APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apks/hackerbuzz-release-x86-*.apk
+          asset_name: hackerbuzz-release-x86.apk
+          asset_content_type: application/zip
+
+      - name: Upload x86_64 APK to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apks/hackerbuzz-release-x86_64-*.apk
+          asset_name: hackerbuzz-release-x86_64.apk
+          asset_content_type: application/zip
