@@ -289,8 +289,6 @@ const Comments = memo(({postData, bottomSheetRef}: {postData: HN_ITEM_TYPE, bott
     );
   }, []);
 
-  if (!commentIDs.length) return null;
-
   return (
     <FlatList
       data={commentIDs}
@@ -304,6 +302,8 @@ const Comments = memo(({postData, bottomSheetRef}: {postData: HN_ITEM_TYPE, bott
       initialNumToRender={5}
       updateCellsBatchingPeriod={50}
       onEndReachedThreshold={0.5}
+      contentContainerStyle={{height: '100%'}}
+      ListEmptyComponent={<View style={{height: '100%', justifyContent: 'center', alignItems: 'center'}}><Text style={{color: 'red'}}>No comments found</Text></View>}
     />
   );
 });
@@ -344,9 +344,9 @@ const HeaderActions = memo(({ postData, bottomSheetRef }: {
         <TouchableOpacity onPress={() => router.back()} style={{padding: 10}}>
           <Text style={{color: colors.backButton, fontWeight: 'bold'}}>Back</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
+        {postData.url && <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
           <Text style={{color: colors.backButton, fontWeight: 'bold'}}>Open Article</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <View style={{flexDirection: 'row', padding: 10}}>
@@ -402,15 +402,7 @@ export default memo(function CommentsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.primary, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      
-      {postData.kids && postData.kids.length > 0 ? (
         <Comments postData={postData} bottomSheetRef={bottomSheetRef} />
-      ) : (
-        <View style={styles.centerContainer}>
-          <Text style={{color: colors.text}}>No comments found</Text>
-        </View>
-      )}
-
       <BottomSheetBroswer ref={bottomSheetRef} url={postData.url} />
     </View>
   );
