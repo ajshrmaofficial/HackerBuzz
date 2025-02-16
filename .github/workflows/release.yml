@@ -30,7 +30,7 @@ jobs:
           ./gradlew assembleRelease
 
       - name: Upload APKs as artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: apks
           path: |
