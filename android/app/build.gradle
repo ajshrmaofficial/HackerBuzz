@@ -142,6 +142,17 @@ android {
             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
     }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def versionName = variant.versionName
+            def buildType = variant.buildType.name
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)
+
+            // Rename the APK
+            def newName = "hackerbuzz-${buildType}-${abi ?: 'universal'}-v${versionName}.apk"
+            output.outputFileName = newName
+        }
+    }
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
