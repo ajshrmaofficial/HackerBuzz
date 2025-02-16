@@ -32,7 +32,7 @@ jobs:
       - name: Build APKs
         run: |
           cd android
-          ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE=android/app/hackerbuzz-release.keystore -PMYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }} -PMYAPP_UPLOAD_KEY_ALIAS=${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }} -PMYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
+          ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE=hackerbuzz-release.keystore -PMYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }} -PMYAPP_UPLOAD_KEY_ALIAS=${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }} -PMYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
 
       - name: Upload APKs as artifacts
         uses: actions/upload-artifact@v4
