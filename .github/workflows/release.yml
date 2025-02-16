@@ -1,0 +1,75 @@
+name: Release APKs
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v1.0.0, v2.0.0, etc.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build APKs
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Upload APKs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: apks
+          path: |
+            android/app/build/outputs/apk/release/hackerbuzz-release-universal-*.apk
+            android/app/build/outputs/apk/release/hackerbuzz-release-armeabi-v7a-*.apk
+            android/app/build/outputs/apk/release/hackerbuzz-release-arm64-v8a-*.apk
+            android/app/build/outputs/apk/release/hackerbuzz-release-x86-*.apk
+            android/app/build/outputs/apk/release/hackerbuzz-release-x86_64-*.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download APKs
+        uses: actions/download-artifact@v3
+        with:
+          name: apks
+          path: ./apks
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload APKs to Release
+        run: |
+          for apk in ./apks/*.apk; do
+            asset_name=$(basename "$apk")
+            echo "Uploading $asset_name..."
+            curl -X POST \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/zip" \
+              --data-binary @"$apk" \
+              "${{ steps.create_release.outputs.upload_url }}?name=$asset_name"
+          done
