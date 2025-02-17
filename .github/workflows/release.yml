@@ -1,5 +1,9 @@
 name: Release APKs
 
+# Grant write permissions to the GITHUB_TOKEN
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -16,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install dependencies
         run: npm install
@@ -28,6 +32,11 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" > hackerbuzz-release.keystore.base64
           base64 --decode hackerbuzz-release.keystore.base64 > android/app/hackerbuzz-release.keystore
+
+      - name: Verify Keystore File
+        run: |
+          ls -la android/app/hackerbuzz-release.keystore
+          keytool -list -v -keystore android/app/hackerbuzz-release.keystore -storepass ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
 
       - name: Build APKs
         run: |
