@@ -26,7 +26,7 @@ jobs:
 
       - name: Decode Keystore File
         run: |
-          echo "${{ secrets.MYAPP_UPLOAD_STORE_FILE }}" > hackerbuzz-release.keystore.base64
+          echo "${{ secrets.KEYSTORE_FILE }}" > hackerbuzz-release.keystore.base64
           base64 --decode hackerbuzz-release.keystore.base64 > android/app/hackerbuzz-release.keystore
 
       - name: Build APKs
