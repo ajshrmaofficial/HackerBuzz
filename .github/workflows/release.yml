@@ -64,12 +64,15 @@ jobs:
           name: apks
           path: ./apks
       
-      - name: List Downloaded APKs
+      - name: Set APK path variables
+        id: set-apk-paths
         run: |
-          ls -la ./apks
-          echo "Contents of APKs directory:"
-          find ./apks -type f -name "*.apk"
-
+          echo "universal_apk=$(find ./apks -name '*universal*.apk' -type f)" >> $GITHUB_OUTPUT
+          echo "armeabi_apk=$(find ./apks -name '*armeabi-v7a*.apk' -type f)" >> $GITHUB_OUTPUT
+          echo "arm64_apk=$(find ./apks -name '*arm64-v8a*.apk' -type f)" >> $GITHUB_OUTPUT
+          echo "x86_apk=$(find ./apks -name '*x86[^_]*.apk' -type f)" >> $GITHUB_OUTPUT
+          echo "x86_64_apk=$(find ./apks -name '*x86_64*.apk' -type f)" >> $GITHUB_OUTPUT
+  
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -80,53 +83,53 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
+  
       - name: Upload Universal APK to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/*universal*.apk
+          asset_path: ${{ steps.set-apk-paths.outputs.universal_apk }}
           asset_name: hackerbuzz-release-universal.apk
-          asset_content_type: application/zip
-
+          asset_content_type: application/vnd.android.package-archive
+  
       - name: Upload armeabi-v7a APK to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/*armeabi-v7a*.apk
+          asset_path: ${{ steps.set-apk-paths.outputs.armeabi_apk }}
           asset_name: hackerbuzz-release-armeabi-v7a.apk
-          asset_content_type: application/zip
-
+          asset_content_type: application/vnd.android.package-archive
+  
       - name: Upload arm64-v8a APK to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/*arm64-v8a*.apk
+          asset_path: ${{ steps.set-apk-paths.outputs.arm64_apk }}
           asset_name: hackerbuzz-release-arm64-v8a.apk
-          asset_content_type: application/zip
-
+          asset_content_type: application/vnd.android.package-archive
+  
       - name: Upload x86 APK to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/*x86*.apk
+          asset_path: ${{ steps.set-apk-paths.outputs.x86_apk }}
           asset_name: hackerbuzz-release-x86.apk
-          asset_content_type: application/zip
-
+          asset_content_type: application/vnd.android.package-archive
+  
       - name: Upload x86_64 APK to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/*x86_64*.apk
+          asset_path: ${{ steps.set-apk-paths.outputs.x86_64_apk }}
           asset_name: hackerbuzz-release-x86_64.apk
-          asset_content_type: application/zip
+          asset_content_type: application/vnd.android.package-archive
