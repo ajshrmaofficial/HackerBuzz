@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -63,6 +63,12 @@ jobs:
         with:
           name: apks
           path: ./apks
+      
+      - name: List Downloaded APKs
+        run: |
+          ls -la ./apks
+          echo "Contents of APKs directory:"
+          find ./apks -type f -name "*.apk"
 
       - name: Create GitHub Release
         id: create_release
