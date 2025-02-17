@@ -1,6 +1,5 @@
 name: Release APKs
 
-# Grant write permissions to the GITHUB_TOKEN
 permissions:
   contents: write
 
@@ -43,16 +42,16 @@ jobs:
           cd android
           ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE=hackerbuzz-release.keystore -PMYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }} -PMYAPP_UPLOAD_KEY_ALIAS=${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }} -PMYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
 
+      - name: List APK Files
+        run: |
+          ls -la android/app/build/outputs/apk/release/
+
       - name: Upload APKs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: apks
           path: |
-            android/app/build/outputs/apk/release/hackerbuzz-release-universal-*.apk
-            android/app/build/outputs/apk/release/hackerbuzz-release-armeabi-v7a-*.apk
-            android/app/build/outputs/apk/release/hackerbuzz-release-arm64-v8a-*.apk
-            android/app/build/outputs/apk/release/hackerbuzz-release-x86-*.apk
-            android/app/build/outputs/apk/release/hackerbuzz-release-x86_64-*.apk
+            android/app/build/outputs/apk/release/*.apk
 
   release:
     needs: build
@@ -82,7 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/hackerbuzz-release-universal-*.apk
+          asset_path: ./apks/*universal*.apk
           asset_name: hackerbuzz-release-universal.apk
           asset_content_type: application/zip
 
@@ -92,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/hackerbuzz-release-armeabi-v7a-*.apk
+          asset_path: ./apks/*armeabi-v7a*.apk
           asset_name: hackerbuzz-release-armeabi-v7a.apk
           asset_content_type: application/zip
 
@@ -102,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/hackerbuzz-release-arm64-v8a-*.apk
+          asset_path: ./apks/*arm64-v8a*.apk
           asset_name: hackerbuzz-release-arm64-v8a.apk
           asset_content_type: application/zip
 
@@ -112,7 +111,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/hackerbuzz-release-x86-*.apk
+          asset_path: ./apks/*x86*.apk
           asset_name: hackerbuzz-release-x86.apk
           asset_content_type: application/zip
 
@@ -122,6 +121,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apks/hackerbuzz-release-x86_64-*.apk
+          asset_path: ./apks/*x86_64*.apk
           asset_name: hackerbuzz-release-x86_64.apk
           asset_content_type: application/zip
