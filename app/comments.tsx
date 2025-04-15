@@ -68,7 +68,7 @@ const CommentSkeleton = memo(() => {
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.commentContainer, { 
+    <View style={[styles.commentContainer, {
       padding: 12,
       marginVertical: 4,
       borderRadius: 8,
@@ -77,23 +77,24 @@ const CommentSkeleton = memo(() => {
       backgroundColor: colors.secondary,
     }]}>
       <View style={styles.commentHeader}>
-        <View style={{ 
-          width: 100, 
-          height: 16, 
+        <View style={{
+          width: 100,
+          height: 16,
           backgroundColor: colors.border,
-          borderRadius: 4}} />
-        <View style={{ 
-          width: 50, 
-          height: 12, 
+          borderRadius: 4
+        }} />
+        <View style={{
+          width: 50,
+          height: 12,
           backgroundColor: colors.border,
-          borderRadius: 4 
+          borderRadius: 4
         }} />
       </View>
-      <View style={{ 
-        width: '100%', 
-        height: 100, 
+      <View style={{
+        width: '100%',
+        height: 100,
         backgroundColor: colors.border,
-        borderRadius: 4 
+        borderRadius: 4
       }} />
     </View>
   );
@@ -108,7 +109,7 @@ const HTMLViewer = memo(({ content }: { content: string | undefined }) => {
 
   if (!content) return null;
 
-  const htmlViewStyles = useMemo(()=>StyleSheet.create({
+  const htmlViewStyles = useMemo(() => StyleSheet.create({
     p: { marginVertical: 0, fontSize: 14, lineHeight: 20, color: colors.text },
     a: { color: colors.link, textDecorationLine: 'underline' as 'underline' },
     pre: { backgroundColor: colors.secondary, padding: 8, borderRadius: 4, color: colors.text },
@@ -131,9 +132,9 @@ const HTMLViewer = memo(({ content }: { content: string | undefined }) => {
   }), [colors]);
 
   return (
-    <HTMLView 
-      value={`<div>${content}</div>`} 
-      stylesheet={htmlViewStyles} 
+    <HTMLView
+      value={`<div>${content}</div>`}
+      stylesheet={htmlViewStyles}
       addLineBreaks={false}
       renderNode={(node, index) => {
         return undefined;
@@ -142,12 +143,12 @@ const HTMLViewer = memo(({ content }: { content: string | undefined }) => {
   );
 });
 
-const CommentBody = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }: { 
-  comment: HN_ITEM_TYPE, 
-  depth: number, 
+const CommentBody = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }: {
+  comment: HN_ITEM_TYPE,
+  depth: number,
   maxDepth: number,
   onToggle: () => void,
-  isCollapsed: boolean 
+  isCollapsed: boolean
 }) => {
   const { colors } = useTheme();
 
@@ -158,10 +159,10 @@ const CommentBody = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }: {
   ]
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={onToggle}
       style={[
-        styles.commentContainer, 
+        styles.commentContainer,
         {
           borderLeftWidth: depth === 0 ? 0 : 1,
           marginLeft: depth * 12,
@@ -185,10 +186,10 @@ const CommentBody = memo(({ comment, depth, maxDepth, onToggle, isCollapsed }: {
   );
 });
 
-const NestedComments = memo(({ commentIDs, depth, maxDepth }: { 
-  commentIDs: number[], 
-  depth: number, 
-  maxDepth: number 
+const NestedComments = memo(({ commentIDs, depth, maxDepth }: {
+  commentIDs: number[],
+  depth: number,
+  maxDepth: number
 }) => {
   const commentQueries = useQueries({
     queries: commentIDs.map(id => ({
@@ -205,11 +206,11 @@ const NestedComments = memo(({ commentIDs, depth, maxDepth }: {
   return (
     <>
       {loadedComments.map(comment => (
-        <Comment 
-          key={comment.id} 
-          comment={comment} 
-          depth={depth} 
-          maxDepth={maxDepth} 
+        <Comment
+          key={comment.id}
+          comment={comment}
+          depth={depth}
+          maxDepth={maxDepth}
         />
       ))}
     </>
@@ -246,17 +247,17 @@ const Comment = memo(({ comment, depth, maxDepth }: {
 
 const Header = memo(({ postData, bottomSheetRef }: { postData: HN_ITEM_TYPE, bottomSheetRef: RefObject<BottomSheetMethods> }) => {
   const { colors } = useTheme();
-  return(
+  return (
     <>
       <Text style={[styles.title, { color: colors.text }]}>{postData.title}</Text>
-      
-      <HeaderActions 
+
+      <HeaderActions
         postData={postData}
         bottomSheetRef={bottomSheetRef}
       />
 
       {postData.text && (
-        <View style={{padding: 10}}>
+        <View style={{ padding: 10 }}>
           <HTMLViewer content={postData.text} />
         </View>
       )}
@@ -264,20 +265,20 @@ const Header = memo(({ postData, bottomSheetRef }: { postData: HN_ITEM_TYPE, bot
   )
 });
 
-const Comments = memo(({postData, bottomSheetRef}: {postData: HN_ITEM_TYPE, bottomSheetRef: RefObject<BottomSheetMethods>}) => {
+const Comments = memo(({ postData, bottomSheetRef }: { postData: HN_ITEM_TYPE, bottomSheetRef: RefObject<BottomSheetMethods> }) => {
   const commentIDs = postData.kids as number[];
 
   const RenderItem = useCallback(({ itemId }: { itemId: number }) => {
-    const {data, isLoading, isError} = useQuery({
+    const { data, isLoading, isError } = useQuery({
       queryKey: [itemId],
       queryFn: () => fetch("item", itemId),
-      staleTime: 5 * 60 * 1000, 
+      staleTime: 5 * 60 * 1000,
     });
 
     if (isLoading) return <CommentSkeleton />;
 
     if (isError || !data) {
-      return <Text style={{color: 'red'}}>Error loading comment</Text>;
+      return <Text style={{ color: 'red' }}>Error loading comment</Text>;
     }
 
     return (
@@ -292,8 +293,8 @@ const Comments = memo(({postData, bottomSheetRef}: {postData: HN_ITEM_TYPE, bott
   return (
     <FlatList
       data={commentIDs}
-      ListHeaderComponent={()=><Header postData={postData} bottomSheetRef={bottomSheetRef} />}
-      renderItem={({item})=> <RenderItem itemId={item} />}
+      ListHeaderComponent={() => <Header postData={postData} bottomSheetRef={bottomSheetRef} />}
+      renderItem={({ item }) => <RenderItem itemId={item} />}
       keyExtractor={item => item.toString()}
       ItemSeparatorComponent={CommentSeparator}
       maxToRenderPerBatch={5}
@@ -302,8 +303,8 @@ const Comments = memo(({postData, bottomSheetRef}: {postData: HN_ITEM_TYPE, bott
       initialNumToRender={5}
       updateCellsBatchingPeriod={50}
       onEndReachedThreshold={0.5}
-      contentContainerStyle={{height: '100%'}}
-      ListEmptyComponent={<View style={{height: '100%', justifyContent: 'center', alignItems: 'center'}}><Text style={{color: 'red'}}>No comments found</Text></View>}
+      contentContainerStyle={{ flexGrow: 1 }}
+      ListEmptyComponent={<View style={{ height: '100%', justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: 'red' }}>No comments found</Text></View>}
     />
   );
 });
@@ -340,35 +341,35 @@ const HeaderActions = memo(({ postData, bottomSheetRef }: {
 
   return (
     <>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <TouchableOpacity onPress={() => router.back()} style={{padding: 10}}>
-          <Text style={{color: colors.backButton, fontWeight: 'bold'}}>Back</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TouchableOpacity onPress={() => router.back()} style={{ padding: 10 }}>
+          <Text style={{ color: colors.backButton, fontWeight: 'bold' }}>Back</Text>
         </TouchableOpacity>
-        {postData.url && <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{padding: 10}}>
-          <Text style={{color: colors.backButton, fontWeight: 'bold'}}>Open Article</Text>
+        {postData.url && <TouchableOpacity onPress={() => bottomSheetRef.current?.snapToIndex(4)} style={{ padding: 10 }}>
+          <Text style={{ color: colors.backButton, fontWeight: 'bold' }}>Open Article</Text>
         </TouchableOpacity>}
       </View>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <View style={{flexDirection: 'row', padding: 10}}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', padding: 10 }}>
           {[["by", "user"], ["score", "like2"], ["time", "clockcircleo"]].map((key) => (
-            <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 10}} key={key[0]}>
-              <AntDesign name={key[1] as "like2" | "user" | "clockcircleo"} size={12} color={colors.text} style={{marginRight: 5}} />
-              <Text style={{color: colors.text, fontSize: 14}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }} key={key[0]}>
+              <AntDesign name={key[1] as "like2" | "user" | "clockcircleo"} size={12} color={colors.text} style={{ marginRight: 5 }} />
+              <Text style={{ color: colors.text, fontSize: 14 }}>
                 {key[0] === "time" ? formatDistanceToNow(fromUnixTime(postData.time)) : postData[key[0] as keyof HN_ITEM_TYPE]}
               </Text>
             </View>
           ))}
         </View>
-        <View style={{flexDirection: 'row', padding: 10}}>
+        <View style={{ flexDirection: 'row', padding: 10 }}>
           <TouchableOpacity onPress={handleShare}>
-            <AntDesign name="sharealt" size={20} color={colors.backButton} style={{marginRight: 15}} />
+            <AntDesign name="sharealt" size={20} color={colors.backButton} style={{ marginRight: 15 }} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleBookmark}>
-            <MaterialCommunityIcons 
-              name={isBookmarked ? "bookmark-off-outline" : "bookmark-outline"} 
-              size={22} 
-              color={colors.backButton} 
-              style={{marginRight: 5}} 
+            <MaterialCommunityIcons
+              name={isBookmarked ? "bookmark-off-outline" : "bookmark-outline"}
+              size={22}
+              color={colors.backButton}
+              style={{ marginRight: 5 }}
             />
           </TouchableOpacity>
         </View>
@@ -381,17 +382,17 @@ export default memo(function CommentsScreen() {
   const postData = JSON.parse(useLocalSearchParams().postData as string) as HN_ITEM_TYPE;
   const bottomSheetRef = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
-  const {colors} = useTheme();
+  const { colors } = useTheme();
 
   if (!postData) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.primary }]}>
-        <Text style={{color: colors.text}}>No post data found</Text>
+        <Text style={{ color: colors.text }}>No post data found</Text>
       </View>
     );
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (!postData.kids || postData.kids.length <= 2) {
         bottomSheetRef.current?.snapToIndex(8);
@@ -402,7 +403,7 @@ export default memo(function CommentsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.primary, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <Comments postData={postData} bottomSheetRef={bottomSheetRef} />
+      <Comments postData={postData} bottomSheetRef={bottomSheetRef} />
       <BottomSheetBroswer ref={bottomSheetRef} url={postData.url} />
     </View>
   );
